@@ -7,11 +7,14 @@ use App\Http\Requests\UpdatePostRequest;
 use App\Models\Category;
 use App\Models\Post;
 use App\Models\Tag;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class PostController extends Controller
 {
+    use AuthorizesRequests;
+
     /**
      * Display a listing of the resource.
      */
@@ -49,7 +52,10 @@ class PostController extends Controller
 
         unset($data['tags']);
         $data['slug'] = Str::slug($data['title']);
-        $post = Post::create($data);
+        $post = $request
+            ->user()
+            ->posts()
+            ->create($data);
 
         $post->tags()->sync($tags);
 
@@ -77,6 +83,7 @@ class PostController extends Controller
      */
     public function edit(Post $post)
     {
+        $this->authorize('update', $post);
         $categories = Category::orderBy('name')->get();
         $tags = Tag::orderBy('name')->get();
 
@@ -96,6 +103,7 @@ class PostController extends Controller
         UpdatePostRequest $request,
         Post $post
     ) {
+        $this->authorize('update', $post);
         $data = $request->validated();
         $tags = $data['tags'] ?? [];
         unset($data['tags']);
@@ -114,6 +122,7 @@ class PostController extends Controller
      */
     public function destroy(Post $post)
     {
+        $this->authorize('delete', $post);
         $post->delete();
 
         return redirect()
