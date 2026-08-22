@@ -8,7 +8,7 @@
 
         {{-- Desktop Navigation --}}
         <div class="hidden items-center gap-8 md:flex">
-            <a href="{{ route('home') }}" class="text-sm font-semibold text-ink transition hover:text-primary">
+            <a href="{{ route('posts.index') }}" class="text-sm font-semibold text-ink transition hover:text-primary">
                 Home
             </a>
             <a href="#" class="text-sm font-medium text-muted transition hover:text-ink">
@@ -24,9 +24,11 @@
             <a href="#" class="text-sm font-semibold text-muted transition hover:text-ink">
                 Sign In
             </a>
-            <x-button>
-                Start Writing
-            </x-button>
+            <a href="{{ route('posts.create') }}">
+                        <x-button>
+                            Start Writing
+                        </x-button>
+                    </a>
         </div>
 
         {{-- Mobile menu button --}}
