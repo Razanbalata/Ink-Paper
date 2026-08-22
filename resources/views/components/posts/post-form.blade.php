@@ -75,7 +75,7 @@
                     <label
                         class="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-border bg-white px-3 py-1.5 text-xs font-medium text-ink transition hover:border-primary has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:text-primary">
                         <input type="checkbox" name="tags[]" value="{{ $tag->id }}"
-                            class="rounded border-border text-primary focus:ring-primary" @checked(in_array($tag->id, old('tags', $post?->tags->pluck('id')->toArray() ?? [])))>
+                            class="rounded border-border text-primary focus:ring-primary" @checked(in_array($tag->id, old('tags', $post?->tags?->pluck('id')->toArray() ?? [])))>
                         <span>#{{ $tag->name }}</span>
                     </label>
                 @endforeach

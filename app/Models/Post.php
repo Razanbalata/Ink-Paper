@@ -57,6 +57,11 @@ class Post extends Model
         return $query->where('status', 'draft');
     }
 
+    public function scopeArchived($query)
+    {
+        return $query->where('status', 'archived');
+    }
+
     protected function readTime(): Attribute
     {
         return Attribute::make(
