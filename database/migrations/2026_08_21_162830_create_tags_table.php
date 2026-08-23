@@ -16,6 +16,10 @@ return new class extends Migration {
                 ->string('name')
                 ->unique();
 
+             $table
+                ->text('description')
+                ->nullable();
+
             $table
                 ->string('slug')
                 ->unique();

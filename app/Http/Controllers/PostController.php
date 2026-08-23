@@ -57,7 +57,7 @@ class PostController extends Controller
             ->posts()
             ->create($data);
 
-        $post->tags()->sync($tags);
+        $post->tags()->sync($request->input('tags', []));
 
         return redirect()
             ->route('posts.show', $post)
@@ -110,7 +110,7 @@ class PostController extends Controller
         $data['slug'] = Str::slug($data['title']);
 
         $post->update($data);
-        $post->tags()->sync($tags);
+        $post->tags()->sync($request->input('tags', []));
 
         return redirect()
             ->route('posts.show', $post)

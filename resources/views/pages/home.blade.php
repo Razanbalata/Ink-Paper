@@ -1,8 +1,8 @@
-@extends('layouts.app')
+@extends('layouts.guest')
 
 @section('title', 'Ink & Paper — Ideas Worth Reading')
 
-@section('content')
+@section('public-content')
 
     {{-- Hero Section --}}
     <section class="border-b border-border bg-paper relative overflow-hidden">

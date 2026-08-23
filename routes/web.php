@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\Dashboard\TagController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DashboardPostController;
 use App\Http\Controllers\PostController;
@@ -61,6 +62,12 @@ Route::middleware('auth')->group(function () {
         'dashboard/categories',
         CategoryController::class
     )->names('dashboard.categories');
+});
+
+Route::middleware('auth')->prefix('dashboard')->name('dashboard.')->group(function () {
+
+    Route::resource('tags', TagController::class);
+
 });
 
 require __DIR__ . '/auth.php';

@@ -30,6 +30,11 @@
                             class="rounded-lg px-3 py-2 text-sm font-semibold transition {{ request()->routeIs('dashboard.categories*') ? 'bg-paper text-primary' : 'text-muted hover:text-ink' }}">
                             Categories
                         </a>
+                        <a href="{{ route('dashboard.tags.index') }}"
+                         class="rounded-lg px-3 py-2 text-sm font-semibold transition {{ request()->routeIs('dashboard.tags*') ? 'bg-paper text-primary' : 'text-muted hover:text-ink' }}">
+                            Tags
+                        
+                        </a>
                     </nav>
                 </div>
 
@@ -47,14 +52,12 @@
                             {{ auth()->user()->name }}
                         </span>
                         <form method="POST" action="{{ route('logout') }}" class="inline">
-    @csrf
-    <button 
-        type="submit" 
-        class="text-sm font-semibold text-muted transition hover:text-red-600 focus:outline-none"
-    >
-        Logout
-    </button>
-</form>
+                            @csrf
+                            <button type="submit"
+                                class="text-sm font-semibold text-muted transition hover:text-red-600 focus:outline-none">
+                                Logout
+                            </button>
+                        </form>
                     </div>
                 </div>
 
