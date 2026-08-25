@@ -52,6 +52,7 @@ class PostController extends Controller
 
         unset($data['tags']);
         $data['slug'] = Str::slug($data['title']);
+        // dd($data);
         $post = $request
             ->user()
             ->posts()
@@ -69,6 +70,11 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
+        abort_unless(
+            $post->status === 'published' && $post->published_at !== null,
+            404
+        );
+
         $post->load([
             'user',
             'category',

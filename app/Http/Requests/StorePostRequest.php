@@ -30,12 +30,6 @@ class StorePostRequest extends FormRequest
                 'min:5',
                 'max:255',
             ],
-            'slug' => [
-                'required',
-                'string',
-                'max:255',
-                'unique:posts,slug',
-            ],
             'excerpt' => [
                 'nullable',
                 'string',
