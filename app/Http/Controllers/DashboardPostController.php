@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Post;
 use Illuminate\Http\Request;
 
 class DashboardPostController extends Controller
@@ -27,6 +28,25 @@ class DashboardPostController extends Controller
         return view(
             'dashboard.posts.index',
             compact('posts')
+        );
+    }
+
+    public function show(Post $post)
+    {
+        abort_unless(
+            $post->user_id === auth()->id(),
+            403
+        );
+
+        $post->load([
+            'user',
+            'category',
+            'tags',
+        ]);
+
+        return view(
+            'dashboard.posts.show',
+            compact('post')
         );
     }
 }
