@@ -26,33 +26,33 @@
 
         <!-- Statistics Grid -->
         <div class="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4 lg:gap-6">
-            <x-card class="flex flex-col justify-between">
+            <div class="flex flex-col justify-between rounded-2xl border border-border bg-white p-5 shadow-sm">
                 <span class="text-xs font-bold uppercase tracking-wider text-muted">Total Posts</span>
                 <strong class="mt-3 font-serif text-3xl font-extrabold text-ink sm:text-4xl">
                     {{ $stats['total'] }}
                 </strong>
-            </x-card>
+            </div>
 
-            <x-card class="flex flex-col justify-between">
+            <div class="flex flex-col justify-between rounded-2xl border border-border bg-white p-5 shadow-sm">
                 <span class="text-xs font-bold uppercase tracking-wider text-primary">Published</span>
                 <strong class="mt-3 font-serif text-3xl font-extrabold text-ink sm:text-4xl">
                     {{ $stats['published'] }}
                 </strong>
-            </x-card>
+            </div>
 
-            <x-card class="flex flex-col justify-between">
+            <div class="flex flex-col justify-between rounded-2xl border border-border bg-white p-5 shadow-sm">
                 <span class="text-xs font-bold uppercase tracking-wider text-amber-600">Drafts</span>
                 <strong class="mt-3 font-serif text-3xl font-extrabold text-ink sm:text-4xl">
                     {{ $stats['drafts'] }}
                 </strong>
-            </x-card>
+            </div>
 
-            <x-card class="flex flex-col justify-between">
+            <div class="flex flex-col justify-between rounded-2xl border border-border bg-white p-5 shadow-sm">
                 <span class="text-xs font-bold uppercase tracking-wider text-stone-500">Archived</span>
                 <strong class="mt-3 font-serif text-3xl font-extrabold text-ink sm:text-4xl">
                     {{ $stats['archived'] }}
                 </strong>
-            </x-card>
+            </div>
         </div>
 
         <!-- Recent Posts Section -->
@@ -69,10 +69,10 @@
 
             <div class="mt-6 space-y-4">
                 @forelse($recentPosts as $post)
-                    <x-card class="group flex flex-col justify-between gap-4 transition hover:border-primary/40 sm:flex-row sm:items-center">
+                    <div class="group flex flex-col justify-between gap-4 rounded-2xl border border-border bg-white p-5 shadow-sm transition hover:border-primary/40 sm:flex-row sm:items-center">
                         <div class="space-y-1">
                             <h3 class="font-serif text-lg font-bold text-ink transition group-hover:text-primary">
-                                <a href="{{ route('posts.show', $post) }}">
+                                <a href="{{ route('dashboard.posts.show', $post) }}">
                                     {{ $post->title }}
                                 </a>
                             </h3>
@@ -100,7 +100,7 @@
                                 Edit
                             </a>
                         </div>
-                    </x-card>
+                    </div>
                 @empty
                     <div class="rounded-2xl border border-dashed border-border p-8 text-center">
                         <p class="text-sm text-muted">You haven't written any posts yet.</p>

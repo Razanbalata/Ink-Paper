@@ -138,9 +138,10 @@
 
                                     <div>
 
-                                        <p class="text-sm font-semibold text-ink">
+                                        <a href="{{ route('authors.show', $post->user) }}"
+                                            class="text-sm font-semibold text-ink transition hover:text-primary">
                                             {{ $post->user->name ?? 'Anonymous' }}
-                                        </p>
+                                        </a>
 
                                         <p class="text-xs text-muted">
                                             {{ $post->read_time }} min read

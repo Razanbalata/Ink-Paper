@@ -20,7 +20,7 @@
         <x-auth-session-status class="mt-6" :status="session('status')" />
 
         <!-- Login Card -->
-        <x-card class="mt-8">
+        <div class="mt-8 rounded-2xl border border-border bg-white p-6 shadow-sm">
             <form method="POST" action="{{ route('login') }}" class="space-y-6">
                 @csrf
 
@@ -87,7 +87,7 @@
                     </x-button>
                 </div>
             </form>
-        </x-card>
+        </div>
 
         <!-- Footer / Register Link -->
         @if (Route::has('register'))

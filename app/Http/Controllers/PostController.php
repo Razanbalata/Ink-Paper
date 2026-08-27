@@ -28,7 +28,7 @@ class PostController extends Controller
             ->latest()
             ->paginate(10);
 
-        return view('posts.index', compact('posts'));
+        return view('dashboard.posts.index', compact('posts'));
     }
 
     /**
@@ -39,7 +39,7 @@ class PostController extends Controller
         $categories = Category::orderBy('name')->get();
         $tags = Tag::orderBy('name')->get();
 
-        return view('posts.create', compact('categories', 'tags'));
+        return view('dashboard.posts.create', compact('categories', 'tags'));
     }
 
     /**
@@ -95,7 +95,7 @@ class PostController extends Controller
 
         $post->load('tags');
 
-        return view('posts.edit', compact(
+        return view('dashboard.posts.edit', compact(
             'post',
             'categories',
             'tags'

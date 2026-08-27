@@ -20,7 +20,7 @@
                 <x-posts.post-form :post="null" :categories="$categories" :tags="$tags" />
 
                 <div class="mt-8 flex items-center justify-end gap-4 border-t border-border/60 pt-6">
-                    <a href="{{ route('posts.index') }}" class="text-sm font-semibold text-muted transition hover:text-ink">
+                    <a href="{{ route('dashboard.posts') }}" class="text-sm font-semibold text-muted transition hover:text-ink">
                         Cancel
                     </a>
                     <x-button type="submit">

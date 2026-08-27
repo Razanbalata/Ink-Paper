@@ -21,7 +21,7 @@
                 <x-posts.post-form :post="$post" :categories="$categories" :tags="$tags" />
 
                 <div class="mt-8 flex items-center justify-end gap-4 border-t border-border/60 pt-6">
-                    <a href="{{ route('posts.show', $post) }}"
+                    <a href="{{ route('dashboard.posts', $post) }}"
                         class="text-sm font-semibold text-muted transition hover:text-ink">
                         Cancel
                     </a>

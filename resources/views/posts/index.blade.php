@@ -1,10 +1,10 @@
-@extends('layouts.app')
+@extends('layouts.guest')
 
 @section('title', 'All Posts — Ink & Paper')
 
-@section('content')
+@section('public-content')
     <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        
+
         <!-- Header Section -->
         <div class="flex flex-col gap-4 border-b border-border pb-8 sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -27,11 +27,12 @@
         <!-- Posts Grid -->
         <div class="mt-10 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             @forelse($posts as $post)
-                <x-card class="group flex flex-col justify-between transition-all duration-200 hover:-translate-y-1 hover:shadow-md">
+                <x-card :post="$post"
+                    class="group flex flex-col justify-between transition-all duration-200 hover:-translate-y-1 hover:shadow-md">
                     <div>
                         <!-- Category Badge -->
                         <div class="flex items-center justify-between">
-                            @if($post->category)
+                            @if ($post->category)
                                 <x-badge variant="primary">
                                     {{ $post->category->name }}
                                 </x-badge>
@@ -46,7 +47,8 @@
 
                         <!-- Post Title & Excerpt -->
                         <div class="mt-4">
-                            <h2 class="font-serif text-2xl font-bold leading-snug text-ink transition group-hover:text-primary">
+                            <h2
+                                class="font-serif text-2xl font-bold leading-snug text-ink transition group-hover:text-primary">
                                 <a href="{{ route('posts.show', $post) }}" class="focus:outline-none">
                                     {{ $post->title }}
                                 </a>
@@ -63,13 +65,15 @@
                         <div class="flex items-center gap-3">
                             <x-avatar :name="$post->user->name ?? 'Anonymous'" size="sm" />
                             <div>
-                                <p class="text-sm font-semibold text-ink">
+                                <a href="{{ route('authors.show', $post->user) }}"
+                                    class="text-sm font-semibold text-ink transition hover:text-primary">
                                     {{ $post->user->name ?? 'Anonymous' }}
-                                </p>
+                                </a>
                             </div>
                         </div>
 
-                        <a href="{{ route('posts.show', $post) }}" class="text-xs font-semibold text-primary transition hover:underline">
+                        <a href="{{ route('posts.show', $post) }}"
+                            class="text-xs font-semibold text-primary transition hover:underline">
                             Read &rarr;
                         </a>
                     </div>
@@ -79,7 +83,8 @@
                 <div class="col-span-full rounded-2xl border border-dashed border-border p-12 text-center">
                     <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
                         <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6" />
                         </svg>
                     </div>
                     <h3 class="mt-4 font-serif text-xl font-bold text-ink">No posts found</h3>
@@ -96,7 +101,7 @@
         </div>
 
         <!-- Pagination -->
-        @if($posts->hasPages())
+        @if ($posts->hasPages())
             <div class="mt-12 border-t border-border pt-6">
                 {{ $posts->links() }}
             </div>

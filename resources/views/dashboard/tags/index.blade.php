@@ -27,7 +27,7 @@
         <!-- Tags Grid -->
         <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             @forelse($tags as $tag)
-                <x-card class="group flex flex-col justify-between transition hover:border-primary/40">
+                <div class="group flex flex-col justify-between transition hover:border-primary/40">
                     <div>
                         <div class="flex items-center justify-between gap-2">
                             <h2 class="font-serif text-xl font-bold text-ink transition group-hover:text-primary">
@@ -71,7 +71,7 @@
                             </button>
                         </form>
                     </div>
-                </x-card>
+                </div>
             @empty
                 <!-- Empty State -->
                 <div class="col-span-full rounded-2xl border border-dashed border-border p-12 text-center">

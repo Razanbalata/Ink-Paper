@@ -24,7 +24,7 @@
         <form method="POST" action="{{ route('dashboard.categories.store') }}" class="mt-8 space-y-6">
             @csrf
 
-            <x-card class="space-y-6">
+            <div class="space-y-6">
                 <!-- Category Name -->
                 <div>
                     <label for="name" class="block text-sm font-bold text-ink">
@@ -60,7 +60,7 @@
                         <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
-            </x-card>
+            </div>
 
             <!-- Actions -->
             <div class="flex items-center justify-end gap-4">

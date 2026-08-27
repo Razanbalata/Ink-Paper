@@ -13,10 +13,7 @@
             <div class="flex flex-wrap items-center gap-3">
 
                 @if ($post->category)
-                    <a
-                        href="#"
-                        class="text-xs font-bold uppercase tracking-widest text-primary hover:underline"
-                    >
+                    <a href="#" class="text-xs font-bold uppercase tracking-widest text-primary hover:underline">
                         {{ $post->category->name }}
                     </a>
                 @endif
@@ -37,34 +34,31 @@
 
 
             {{-- Title --}}
-            <h1 class="mt-6 font-serif text-4xl font-extrabold leading-tight tracking-tight text-ink sm:text-5xl lg:text-6xl">
+            <h1
+                class="mt-6 font-serif text-4xl font-extrabold leading-tight tracking-tight text-ink sm:text-5xl lg:text-6xl">
                 {{ $post->title }}
             </h1>
 
 
             {{-- Excerpt --}}
             @if ($post->excerpt)
-
                 <p class="mt-6 max-w-3xl font-serif text-xl leading-relaxed text-muted sm:text-2xl">
                     {{ $post->excerpt }}
                 </p>
-
             @endif
 
 
             {{-- Author --}}
             <div class="mt-8 flex items-center gap-3">
 
-                <x-avatar
-                    :name="$post->user->name ?? 'Anonymous'"
-                    size="md"
-                />
+                <x-avatar :name="$post->user->name ?? 'Anonymous'" size="md" />
 
                 <div>
 
-                    <p class="text-sm font-bold text-ink">
+                    <a href="{{ route('authors.show', $post->user) }}"
+                        class="text-sm font-semibold text-ink transition hover:text-primary">
                         {{ $post->user->name ?? 'Anonymous' }}
-                    </p>
+                    </a>
 
                     <p class="text-xs text-muted">
                         Author
@@ -79,17 +73,12 @@
 
         {{-- Cover Image --}}
         @if ($post->cover_image)
-
             <div class="mt-10 overflow-hidden rounded-2xl border border-border">
 
-                <img
-                    src="{{ asset('storage/' . $post->cover_image) }}"
-                    alt="{{ $post->title }}"
-                    class="max-h-[550px] w-full object-cover"
-                >
+                <img src="{{ asset('storage/' . $post->cover_image) }}" alt="{{ $post->title }}"
+                    class="max-h-[550px] w-full object-cover">
 
             </div>
-
         @endif
 
 
@@ -117,14 +106,10 @@
                 <div class="flex flex-wrap gap-2">
 
                     @foreach ($post->tags as $tag)
-
-                        <a
-                            href="{{ route('tags.show', $tag->slug) }}"
-                            class="rounded-lg border border-border bg-white px-3 py-1.5 text-xs font-medium text-ink transition hover:border-primary hover:text-primary"
-                        >
+                        <a href="{{ route('tags.show', $tag->slug) }}"
+                            class="rounded-lg border border-border bg-white px-3 py-1.5 text-xs font-medium text-ink transition hover:border-primary hover:text-primary">
                             #{{ $tag->name }}
                         </a>
-
                     @endforeach
 
                 </div>
@@ -137,10 +122,8 @@
         {{-- Back --}}
         <div class="mt-10 border-t border-border pt-6">
 
-            <a
-                href="{{ route('home') }}"
-                class="inline-flex items-center gap-2 text-sm font-semibold text-primary transition hover:gap-3"
-            >
+            <a href="{{ route('home') }}"
+                class="inline-flex items-center gap-2 text-sm font-semibold text-primary transition hover:gap-3">
                 ← Back to Ink & Paper
             </a>
 

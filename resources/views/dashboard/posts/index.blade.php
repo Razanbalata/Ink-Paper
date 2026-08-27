@@ -49,11 +49,11 @@
         <!-- Posts List -->
         <div class="mt-8 space-y-4">
             @forelse($posts as $post)
-                <x-card class="group flex flex-col justify-between gap-4 transition hover:border-primary/40 sm:flex-row sm:items-center">
+                <div class="group flex flex-col justify-between gap-4 rounded-2xl border border-border bg-white p-5 shadow-sm transition hover:border-primary/40 sm:flex-row sm:items-center">
                     <div class="space-y-1">
                         <div class="flex items-center gap-3">
                             <h2 class="font-serif text-xl font-bold text-ink transition group-hover:text-primary">
-                                <a href="{{ route('posts.show', $post) }}">
+                                <a href="{{ route('dashboard.posts.show', $post) }}">
                                     {{ $post->title }}
                                 </a>
                             </h2>
@@ -87,7 +87,7 @@
                             Edit
                         </a>
                     </div>
-                </x-card>
+                </div>
 
             @empty
                 <!-- Empty State -->
