@@ -17,7 +17,7 @@ class HomeController extends Controller
             ])
             ->latest('published_at')
             ->first();
-       // dd($featuredPost);
+        // dd($featuredPost);
         $posts = Post::published()
             ->with([
                 'user',
@@ -37,7 +37,13 @@ class HomeController extends Controller
             ->paginate(10);
 
         $categories = Category::query()
-            ->withCount('posts')
+            ->withCount([
+                'posts' => function ($query) {
+                    $query
+                        ->where('status', 'published')
+                        ->whereNotNull('published_at');
+                }
+            ])
             ->orderByDesc('posts_count')
             ->take(6)
             ->get();

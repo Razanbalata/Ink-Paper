@@ -52,7 +52,20 @@ class PostController extends Controller
 
         unset($data['tags']);
         $data['slug'] = Str::slug($data['title']);
-        // dd($data);
+
+        // Upload cover image
+        if ($request->hasFile('cover_image')) {
+            $data['cover_image'] = $request
+                ->file('cover_image')
+                ->store('posts', 'public');
+        }
+
+        if ($data['status'] === 'published') {
+            $data['published_at'] = now();
+        } else {
+            $data['published_at'] = null;
+        }
+
         $post = $request
             ->user()
             ->posts()
@@ -61,7 +74,7 @@ class PostController extends Controller
         $post->tags()->sync($request->input('tags', []));
 
         return redirect()
-            ->route('posts.show', $post)
+            ->route('dashboard.posts.show', $post)
             ->with('success', 'Post created successfully.');
     }
 
@@ -106,22 +119,57 @@ class PostController extends Controller
      * Update the specified resource in storage.
      */
     public function update(
-        UpdatePostRequest $request,
-        Post $post
-    ) {
-        $this->authorize('update', $post);
-        $data = $request->validated();
-        $tags = $data['tags'] ?? [];
-        unset($data['tags']);
-        $data['slug'] = Str::slug($data['title']);
+    UpdatePostRequest $request,
+    Post $post
+) {
+    $this->authorize('update', $post);
 
-        $post->update($data);
-        $post->tags()->sync($request->input('tags', []));
+    $data = $request->validated();
 
-        return redirect()
-            ->route('posts.show', $post)
-            ->with('success', 'Post updated successfully.');
+    $tags = $data['tags'] ?? [];
+    unset($data['tags']);
+
+    $data['slug'] = Str::slug($data['title']);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Cover Image
+    |--------------------------------------------------------------------------
+    */
+
+    if ($request->hasFile('cover_image')) {
+
+        // Delete old image
+        if ($post->cover_image) {
+            Storage::disk('public')->delete($post->cover_image);
+        }
+
+        // Store new image
+        $data['cover_image'] = $request
+            ->file('cover_image')
+            ->store('posts', 'public');
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Publishing
+    |--------------------------------------------------------------------------
+    */
+
+    if ($data['status'] === 'published') {
+        $data['published_at'] ??= $post->published_at ?? now();
+    } else {
+        $data['published_at'] = null;
+    }
+
+    $post->update($data);
+
+    $post->tags()->sync($tags);
+
+    return redirect()
+        ->route('dashboard.posts', $post)
+        ->with('success', 'Post updated successfully.');
+}
 
     /**
      * Remove the specified resource from storage.

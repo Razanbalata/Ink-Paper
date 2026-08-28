@@ -35,6 +35,12 @@ class StorePostRequest extends FormRequest
                 'string',
                 'max:500',
             ],
+            'cover_image' => [
+                'nullable',
+                'image',
+                'mimes:jpeg,png,jpg,webp',
+                'max:2048',
+            ],
             'content' => [
                 'required',
                 'string',

@@ -32,16 +32,16 @@ class UpdatePostRequest extends FormRequest
                 'min:5',
                 'max:255',
             ],
-            'slug' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('posts', 'slug')->ignore($post),
-            ],
             'excerpt' => [
                 'nullable',
                 'string',
                 'max:500',
+            ],
+            'cover_image' => [
+                'nullable',
+                'image',
+                'mimes:jpeg,png,jpg,webp',
+                'max:2048',
             ],
             'content' => [
                 'required',

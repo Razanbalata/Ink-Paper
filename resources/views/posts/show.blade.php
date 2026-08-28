@@ -73,11 +73,9 @@
 
         {{-- Cover Image --}}
         @if ($post->cover_image)
-            <div class="mt-10 overflow-hidden rounded-2xl border border-border">
-
+            <div class="mt-10 overflow-hidden rounded-2xl border border-border bg-zinc-100 shadow-sm">
                 <img src="{{ asset('storage/' . $post->cover_image) }}" alt="{{ $post->title }}"
-                    class="max-h-[550px] w-full object-cover">
-
+                    class="w-full object-cover">
             </div>
         @endif
 

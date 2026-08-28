@@ -14,7 +14,7 @@
 
         <!-- Form Container -->
         <div class="mt-10 rounded-2xl border border-border bg-white p-6 sm:p-10 shadow-sm">
-            <form method="POST" action="{{ route('posts.store') }}">
+            <form method="POST" action="{{ route('posts.store') }}" enctype="multipart/form-data">
                 @csrf
 
                 <x-posts.post-form :post="null" :categories="$categories" :tags="$tags" />
