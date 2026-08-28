@@ -24,6 +24,7 @@ class PostController extends Controller
             'user',
             'category',
             'tags',
+            'comments.user',
         ])
             ->latest()
             ->paginate(10);
@@ -92,6 +93,7 @@ class PostController extends Controller
             'user',
             'category',
             'tags',
+            'comments.user',
         ]);
 
         return view('posts.show', compact('post'));

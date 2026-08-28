@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Dashboard\TagController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DashboardPostController;
 use App\Http\Controllers\HomeController;
@@ -14,10 +15,10 @@ use App\Http\Controllers\SearchController;
 use Illuminate\Support\Facades\Route;
 
 /*
-|--------------------------------------------------------------------------
-| Public Routes
-|--------------------------------------------------------------------------
-*/
+ * |--------------------------------------------------------------------------
+ * | Public Routes
+ * |--------------------------------------------------------------------------
+ */
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::view('/about', 'pages.about')->name('about');
@@ -26,34 +27,33 @@ Route::view('/contact', 'pages.contact')->name('contact');
 // Public Posts List
 Route::get('/posts', [PostController::class, 'index'])->name('posts.index');
 
-
 /*
-|--------------------------------------------------------------------------
-| Authenticated Routes
-|--------------------------------------------------------------------------
-*/
+ * |--------------------------------------------------------------------------
+ * | Authenticated Routes
+ * |--------------------------------------------------------------------------
+ */
 
 Route::middleware('auth')->group(function () {
     /*
-    |--------------------------------------------------------------------------
-    | Dashboard
-    |--------------------------------------------------------------------------
-    */
+     * |--------------------------------------------------------------------------
+     * | Dashboard
+     * |--------------------------------------------------------------------------
+     */
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     /*
-    |--------------------------------------------------------------------------
-    | Dashboard Posts
-    |--------------------------------------------------------------------------
-    */
+     * |--------------------------------------------------------------------------
+     * | Dashboard Posts
+     * |--------------------------------------------------------------------------
+     */
     Route::get('/dashboard/posts', [DashboardPostController::class, 'index'])->name('dashboard.posts');
     Route::get('/dashboard/posts/{post}', [DashboardPostController::class, 'show'])->name('dashboard.posts.show');
 
     /*
-    |--------------------------------------------------------------------------
-    | Post Management (Create, Edit, Delete)
-    |--------------------------------------------------------------------------
-    */
+     * |--------------------------------------------------------------------------
+     * | Post Management (Create, Edit, Delete)
+     * |--------------------------------------------------------------------------
+     */
     Route::resource('posts', PostController::class)->only([
         'create',
         'store',
@@ -63,19 +63,19 @@ Route::middleware('auth')->group(function () {
     ]);
 
     /*
-    |--------------------------------------------------------------------------
-    | Profile
-    |--------------------------------------------------------------------------
-    */
+     * |--------------------------------------------------------------------------
+     * | Profile
+     * |--------------------------------------------------------------------------
+     */
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     /*
-    |--------------------------------------------------------------------------
-    | Dashboard Categories & Tags
-    |--------------------------------------------------------------------------
-    */
+     * |--------------------------------------------------------------------------
+     * | Dashboard Categories & Tags
+     * |--------------------------------------------------------------------------
+     */
     Route::resource('dashboard/categories', CategoryController::class)->names('dashboard.categories');
 
     Route::prefix('dashboard')->name('dashboard.')->group(function () {
@@ -83,11 +83,23 @@ Route::middleware('auth')->group(function () {
     });
 });
 
+Route::middleware('auth')->group(function () {
+    Route::post('/posts/{post}/comments', [
+        CommentController::class,
+        'store'
+    ])->name('comments.store');
+
+    Route::delete('/comments/{comment}', [
+        CommentController::class,
+        'destroy'
+    ])->name('comments.destroy');
+});
+
 /*
-|--------------------------------------------------------------------------
-| Wildcard Routes (يجب أن تكون في الأسفل لتجنب التضارب)
-|--------------------------------------------------------------------------
-*/
+ * |--------------------------------------------------------------------------
+ * | Wildcard Routes (يجب أن تكون في الأسفل لتجنب التضارب)
+ * |--------------------------------------------------------------------------
+ */
 Route::get('/posts/{post:slug}', [PostController::class, 'show'])->name('posts.show');
 
 Route::get('/categories/{category:slug}', [PublicCategoryController::class, 'show'])->name('categories.show');

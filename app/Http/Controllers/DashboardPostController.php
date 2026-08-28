@@ -42,6 +42,7 @@ class DashboardPostController extends Controller
             'user',
             'category',
             'tags',
+            'comments.user',
         ]);
 
         return view(
