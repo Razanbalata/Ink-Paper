@@ -11,6 +11,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicAuthorController;
 use App\Http\Controllers\PublicCategoryController;
 use App\Http\Controllers\PublicTagController;
+use App\Http\Controllers\ReactionController;
 use App\Http\Controllers\SearchController;
 use Illuminate\Support\Facades\Route;
 
@@ -99,6 +100,14 @@ Route::middleware('auth')->group(function () {
         'destroy',
     ])->name('comments.destroy');
 });
+
+Route::middleware('auth')->group(function () {
+    Route::post('/posts/{post}/reaction', [ReactionController::class, 'toggle'])
+        ->name('reactions.toggle');
+});
+
+Route::get('/posts/{post}/reactions/users', [ReactionController::class, 'users'])
+    ->name('reactions.users');
 
 /*
  * |--------------------------------------------------------------------------

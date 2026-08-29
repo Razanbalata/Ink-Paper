@@ -94,6 +94,7 @@ class PostController extends Controller
             'category',
             'tags',
             'comments.user',
+            'reactions',
         ]);
 
         return view('posts.show', compact('post'));
