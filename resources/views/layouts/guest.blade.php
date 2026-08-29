@@ -35,8 +35,13 @@
                 {{-- Desktop Actions --}}
                 <div class="hidden items-center gap-4 md:flex">
                     @auth
+
+                        {{-- Notifications --}}
+                        <x-notification-dropdown />
+
                         {{-- Write --}}
-                        <a href="{{ route('posts.create') }}" class="text-sm font-semibold text-muted transition hover:text-ink">
+                        <a href="{{ route('posts.create') }}"
+                            class="text-sm font-semibold text-muted transition hover:text-ink">
                             Write
                         </a>
 
@@ -70,7 +75,8 @@
                         <path stroke-linecap="round" stroke-width="1.8" d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
 
-                    <svg id="menu-close-icon" class="hidden h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg id="menu-close-icon" class="hidden h-5 w-5" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-width="1.8" d="M6 6l12 12M6 18L18 6" />
                     </svg>
                 </button>
@@ -131,7 +137,8 @@
             {{-- Flash Messages --}}
             @if (session('success'))
                 <div class="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
-                    <div class="flex items-center gap-3 rounded-xl border border-primary/20 bg-primary/10 p-4 text-sm font-medium text-primary">
+                    <div
+                        class="flex items-center gap-3 rounded-xl border border-primary/20 bg-primary/10 p-4 text-sm font-medium text-primary">
                         <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0z" />

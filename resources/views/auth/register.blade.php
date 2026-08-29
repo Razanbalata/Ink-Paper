@@ -17,7 +17,7 @@
         </div>
 
         <!-- Register Card -->
-        <x-card class="mt-8">
+        <div class="mt-8">
             <form method="POST" action="{{ route('register') }}" class="space-y-6">
                 @csrf
 
@@ -99,7 +99,7 @@
                     </x-button>
                 </div>
             </form>
-        </x-card>
+        </div>
 
         <!-- Footer / Login Link -->
         <p class="mt-6 text-center text-sm text-muted">

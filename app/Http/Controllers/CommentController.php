@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Comment;
 use App\Models\Post;
+use App\Notifications\CommentReceived;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 
@@ -25,10 +26,20 @@ class CommentController extends Controller
             ],
         ]);
 
-        $post->comments()->create([
+        $comment = $post->comments()->create([
             'user_id' => $request->user()->id,
             'body' => $validated['body'],
         ]);
+        // Send notification to the post owner
+        if ($post->user_id !== $request->user()->id) {
+            $post->user->notify(
+                new CommentReceived(
+                    $request->user(),
+                    $post,
+                    $comment
+                )
+            );
+        }
 
         if ($request->input('redirect_to') === 'dashboard') {
             return redirect()

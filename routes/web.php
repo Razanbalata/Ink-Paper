@@ -6,6 +6,7 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DashboardPostController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicAuthorController;
@@ -108,6 +109,22 @@ Route::middleware('auth')->group(function () {
 
 Route::get('/posts/{post}/reactions/users', [ReactionController::class, 'users'])
     ->name('reactions.users');
+
+Route::middleware('auth')->group(function () {
+    Route::post('/notifications/{notification}/read', [
+        NotificationController::class,
+        'markAsRead',
+    ])->name('notifications.read');
+
+    Route::post('/notifications/read-all', [
+        NotificationController::class,
+        'markAllAsRead',
+    ])->name('notifications.read-all');
+});
+Route::get('/notifications', [
+    NotificationController::class,
+    'index',
+])->name('notifications.index');
 
 /*
  * |--------------------------------------------------------------------------

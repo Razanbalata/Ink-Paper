@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+use App\Notifications\ReactionReceived;
 use Illuminate\Http\Request;
 
 class ReactionController extends Controller
@@ -29,6 +30,13 @@ class ReactionController extends Controller
             ]);
 
             $reacted = true;
+
+            // Send notification to the post owner
+            if ($post->user_id !== $user->id) {
+                $post->user->notify(
+                    new ReactionReceived($user, $post)
+                );
+            }
         }
 
         return response()->json([

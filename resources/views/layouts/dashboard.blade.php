@@ -31,15 +31,18 @@
                             Categories
                         </a>
                         <a href="{{ route('dashboard.tags.index') }}"
-                         class="rounded-lg px-3 py-2 text-sm font-semibold transition {{ request()->routeIs('dashboard.tags*') ? 'bg-paper text-primary' : 'text-muted hover:text-ink' }}">
+                            class="rounded-lg px-3 py-2 text-sm font-semibold transition {{ request()->routeIs('dashboard.tags*') ? 'bg-paper text-primary' : 'text-muted hover:text-ink' }}">
                             Tags
-                        
+
                         </a>
                     </nav>
                 </div>
 
                 <!-- User Profile & Action -->
                 <div class="flex items-center gap-4">
+
+                    {{-- Notifications --}}
+                    <x-notification-dropdown />
                     <a href="{{ route('posts.create') }}" class="hidden sm:block">
                         <x-button>
                             + New Story
