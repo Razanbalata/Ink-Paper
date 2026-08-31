@@ -1,5 +1,7 @@
 @extends('layouts.app')
-
+<div id="notification-toast-container"
+    class="fixed right-5 top-20 z-[100] flex w-[calc(100%-2.5rem)] max-w-sm flex-col gap-3">
+</div>
 @section('content')
     <div class="flex min-h-screen flex-col">
 

@@ -15,11 +15,10 @@
         </svg>
 
         {{-- Unread Badge --}}
-        @if ($unreadCount > 0)
-            <span class="absolute right-1 top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold leading-none text-white">
-                {{ $unreadCount > 99 ? '99+' : $unreadCount }}
-            </span>
-        @endif
+        <span id="notification-unread-count" data-count="{{ $unreadCount }}"
+            class="{{ $unreadCount > 0 ? '' : 'hidden' }} absolute right-1 top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold leading-none text-white">
+            {{ $unreadCount > 99 ? '99+' : $unreadCount }}
+        </span>
     </button>
 
     {{-- Dropdown --}}
@@ -44,26 +43,29 @@
         </div>
 
         {{-- List --}}
-        <div class="max-h-96 overflow-y-auto divide-y divide-border">
+        <div id="notifications-list" class="max-h-96 overflow-y-auto divide-y divide-border">
             @forelse ($notifications as $notification)
                 @php $isUnread = is_null($notification->read_at); @endphp
-                
+
                 <form method="POST" action="{{ route('notifications.read', $notification->id) }}">
                     @csrf
-                    <input type="hidden" name="redirect_to" value="{{ route('dashboard.posts.show', $notification->data['post_id'] ?? '') }}">
+                    <input type="hidden" name="redirect_to"
+                        value="{{ route('dashboard.posts.show', $notification->data['post_id'] ?? '') }}">
 
-                    <button type="submit" 
+                    <button type="submit"
                         class="flex w-full gap-3 px-4 py-3 text-left transition hover:bg-paper {{ $isUnread ? 'bg-paper/40' : 'bg-white' }}">
-                        
+
                         {{-- Icon --}}
                         <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-paper">
                             @if (($notification->data['type'] ?? null) === 'reaction')
-                                <svg class="h-4 w-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="h-4 w-4 text-primary" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
                                         d="M20.8 8.8c0 5.5-8.8 10.2-8.8 10.2S3.2 14.3 3.2 8.8A4.8 4.8 0 0 1 8 4a5.2 5.2 0 0 1 4 2.1A5.2 5.2 0 0 1 16 4a4.8 4.8 0 0 1 4.8 4.8Z" />
                                 </svg>
                             @else
-                                <svg class="h-4 w-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="h-4 w-4 text-primary" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
                                         d="M21 11.5a8.4 8.4 0 0 1-8.9 8.4A8.5 8.5 0 0 1 3 11.5 8.5 8.5 0 0 1 11.5 3a8.5 8.5 0 0 1 8.5 8.5Z" />
                                     <path stroke-linecap="round" stroke-width="1.8" d="M8 11.5h8" />
@@ -110,7 +112,8 @@
 
         {{-- Footer --}}
         <div class="border-t border-border bg-paper/50 px-4 py-2.5 text-center">
-            <a href="{{ route('notifications.index') }}" class="text-xs font-semibold text-primary transition hover:opacity-80">
+            <a href="{{ route('notifications.index') }}"
+                class="text-xs font-semibold text-primary transition hover:opacity-80">
                 View all notifications
             </a>
         </div>

@@ -6,6 +6,7 @@ use App\Models\Post;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -28,7 +29,7 @@ class ReactionReceived extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['database', 'broadcast'];
     }
 
     /**
@@ -57,5 +58,21 @@ class ReactionReceived extends Notification
             'post_title' => $this->post->title,
             'message' => $this->user->name . ' reacted to your post.',
         ];
+    }
+
+    /**
+     * Get the broadcastable representation of the notification.
+     */
+    public function toBroadcast(object $notifiable): BroadcastMessage
+    {
+        return new BroadcastMessage([
+            'type' => 'reaction',
+            'user_id' => $this->user->id,
+            'user_name' => $this->user->name,
+            'post_id' => $this->post->id,
+            'post_title' => $this->post->title,
+            'post_slug' => $this->post->slug,
+            'message' => $this->user->name . ' reacted to your post.',
+        ]);
     }
 }
