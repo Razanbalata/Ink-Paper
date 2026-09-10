@@ -48,6 +48,27 @@
                             + New Story
                         </x-button>
                     </a>
+                    <a 
+    href="{{ route('bookmarks.index') }}" 
+    class="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+>
+    <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        fill="none" 
+        viewBox="0 0 24 24" 
+        stroke-width="1.5" 
+        stroke="currentColor" 
+        class="w-5 h-5"
+    >
+        <path 
+            stroke-linecap="round" 
+            stroke-linejoin="round" 
+            d="M17.593 3.322c.1.137.14.308.14.48v15.876c0 .593-.673.956-1.18.636l-4.553-2.87-4.553 2.87c-.507.32-1.18-.043-1.18-.636V3.802c0-.172.04-.343.14-.48A2.25 2.25 0 0 1 8.25 2.25h7.5a2.25 2.25 0 0 1 1.843 1.072Z"
+        />
+    </svg>
+
+    <span>Saved</span>
+</a>
 
                     <div class="flex items-center gap-3 border-l border-border pl-4">
                         <x-avatar :name="auth()->user()->name" size="sm" />

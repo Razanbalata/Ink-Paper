@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Dashboard\TagController;
+use App\Http\Controllers\BookmarkController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\DashboardController;
@@ -125,6 +126,13 @@ Route::get('/notifications', [
     NotificationController::class,
     'index',
 ])->name('notifications.index');
+
+Route::middleware('auth')->group(function () {
+    Route::post('/posts/{post}/bookmark', [BookmarkController::class, 'toggle'])
+        ->name('bookmarks.toggle');
+    Route::get('/saved', [BookmarkController::class, 'index'])
+        ->name('bookmarks.index');
+});
 
 /*
  * |--------------------------------------------------------------------------
