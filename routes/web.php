@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AI\WritingAssistantController;
 use App\Http\Controllers\Dashboard\TagController;
 use App\Http\Controllers\BookmarkController;
 use App\Http\Controllers\CategoryController;
@@ -132,6 +133,11 @@ Route::middleware('auth')->group(function () {
         ->name('bookmarks.toggle');
     Route::get('/saved', [BookmarkController::class, 'index'])
         ->name('bookmarks.index');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::post('/ai/writing/improve', [WritingAssistantController::class, 'improve'])
+        ->name('ai.writing.improve');
 });
 
 /*
