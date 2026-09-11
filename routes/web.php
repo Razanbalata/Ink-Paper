@@ -138,6 +138,8 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('/ai/writing/improve', [WritingAssistantController::class, 'improve'])
         ->name('ai.writing.improve');
+    Route::post('/ai/writing/title', [WritingAssistantController::class, 'title'])
+        ->name('ai.writing.title');
 });
 
 /*

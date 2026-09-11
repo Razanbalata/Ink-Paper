@@ -26,4 +26,22 @@ class WritingAssistantController extends Controller
             'result' => $result,
         ]);
     }
+
+    public function title(
+        Request $request,
+        WritingAssistantService $writingAssistant
+    ): JsonResponse {
+        $validated = $request->validate([
+            'content' => ['required', 'string', 'min:10'],
+        ]);
+
+        $titles = $writingAssistant->generateTitles(
+            $validated['content']
+        );
+
+        return response()->json([
+            'success' => true,
+            'titles' => $titles,
+        ]);
+    }
 }
