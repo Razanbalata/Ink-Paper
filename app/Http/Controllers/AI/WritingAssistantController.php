@@ -44,4 +44,22 @@ class WritingAssistantController extends Controller
             'titles' => $titles,
         ]);
     }
+
+    public function excerpt(
+    Request $request,
+    WritingAssistantService $writingAssistant
+): JsonResponse {
+    $validated = $request->validate([
+        'content' => ['required', 'string', 'min:10'],
+    ]);
+
+    $excerpt = $writingAssistant->generateExcerpt(
+        $validated['content']
+    );
+
+    return response()->json([
+        'success' => true,
+        'excerpt' => $excerpt,
+    ]);
+}
 }

@@ -140,6 +140,8 @@ Route::middleware('auth')->group(function () {
         ->name('ai.writing.improve');
     Route::post('/ai/writing/title', [WritingAssistantController::class, 'title'])
         ->name('ai.writing.title');
+    Route::post('/ai/writing/excerpt', [WritingAssistantController::class, 'excerpt'])
+        ->name('ai.writing.excerpt');
 });
 
 /*
