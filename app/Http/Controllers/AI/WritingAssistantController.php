@@ -46,20 +46,38 @@ class WritingAssistantController extends Controller
     }
 
     public function excerpt(
-    Request $request,
-    WritingAssistantService $writingAssistant
-): JsonResponse {
-    $validated = $request->validate([
-        'content' => ['required', 'string', 'min:10'],
-    ]);
+        Request $request,
+        WritingAssistantService $writingAssistant
+    ): JsonResponse {
+        $validated = $request->validate([
+            'content' => ['required', 'string', 'min:10'],
+        ]);
 
-    $excerpt = $writingAssistant->generateExcerpt(
-        $validated['content']
-    );
+        $excerpt = $writingAssistant->generateExcerpt(
+            $validated['content']
+        );
 
-    return response()->json([
-        'success' => true,
-        'excerpt' => $excerpt,
-    ]);
-}
+        return response()->json([
+            'success' => true,
+            'excerpt' => $excerpt,
+        ]);
+    }
+
+    public function tags(
+        Request $request,
+        WritingAssistantService $writingAssistant
+    ): JsonResponse {
+        $validated = $request->validate([
+            'content' => ['required', 'string', 'min:10'],
+        ]);
+
+        $tags = $writingAssistant->suggestTags(
+            $validated['content']
+        );
+
+        return response()->json([
+            'success' => true,
+            'tags' => $tags,
+        ]);
+    }
 }

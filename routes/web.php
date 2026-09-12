@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AI\AITagController;
 use App\Http\Controllers\AI\WritingAssistantController;
 use App\Http\Controllers\Dashboard\TagController;
 use App\Http\Controllers\BookmarkController;
@@ -142,6 +143,10 @@ Route::middleware('auth')->group(function () {
         ->name('ai.writing.title');
     Route::post('/ai/writing/excerpt', [WritingAssistantController::class, 'excerpt'])
         ->name('ai.writing.excerpt');
+    Route::post('/ai/writing/tags', [WritingAssistantController::class, 'tags'])
+        ->name('ai.writing.tags');
+        Route::post('/ai/writing/tags/add', [AITagController::class, 'store'])
+    ->name('ai.writing.tags.add');
 });
 
 /*

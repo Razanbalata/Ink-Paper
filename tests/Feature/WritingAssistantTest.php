@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Tag;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
@@ -93,5 +94,59 @@ class WritingAssistantTest extends TestCase
                 'api.groq.com/openai/v1/chat/completions'
             );
         });
+    }
+
+    public function test_user_can_suggest_article_tags(): void
+    {
+        Http::fake([
+            'api.groq.com/*' => Http::response([
+                'choices' => [
+                    [
+                        'message' => [
+                            'content' => json_encode([
+                                'tags' => [
+                                    'Laravel',
+                                    'PHP',
+                                    'AI',
+                                    'Web Development',
+                                ],
+                            ]),
+                        ],
+                    ],
+                ],
+            ], 200),
+        ]);
+
+        Tag::create([
+            'name' => 'Laravel',
+            'slug' => 'laravel',
+        ]);
+
+        Tag::create([
+            'name' => 'PHP',
+            'slug' => 'php',
+        ]);
+
+        $user = User::factory()->create();
+
+        $response = $this
+            ->actingAs($user)
+            ->postJson(route('ai.writing.tags'), [
+                'content' => 'I am learning Laravel and building backend applications with PHP and AI.',
+            ]);
+
+        $response
+            ->assertSuccessful()
+            ->assertJson([
+                'success' => true,
+            ])
+            ->assertJsonPath('tags.0.name', 'Laravel')
+            ->assertJsonPath('tags.0.exists', true)
+            ->assertJsonPath('tags.1.name', 'PHP')
+            ->assertJsonPath('tags.1.exists', true)
+            ->assertJsonPath('tags.2.name', 'AI')
+            ->assertJsonPath('tags.2.exists', false)
+            ->assertJsonPath('tags.3.name', 'Web Development')
+            ->assertJsonPath('tags.3.exists', false);
     }
 }
