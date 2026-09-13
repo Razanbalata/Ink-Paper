@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Category;
 use App\Models\Tag;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -161,6 +162,10 @@ public function test_user_can_improve_an_entire_article(): void
                             'title' => 'Building Better Laravel Applications',
                             'excerpt' => 'A practical look at building Laravel applications.',
                             'content' => 'Improved article content with better clarity and flow.',
+                            'category' => [
+                                'id' => 1,
+                                'name' => 'Web Development',
+                            ],
                             'tags' => [
                                 'Laravel',
                                 'PHP',
@@ -171,6 +176,12 @@ public function test_user_can_improve_an_entire_article(): void
                 ],
             ],
         ], 200),
+    ]);
+
+    Category::create([
+        'id' => 1,
+        'name' => 'Web Development',
+        'slug' => 'web-development',
     ]);
 
     Tag::create([
@@ -187,9 +198,12 @@ public function test_user_can_improve_an_entire_article(): void
 
     $response = $this
         ->actingAs($user)
-        ->postJson(route('ai.writing.improve-article'), [
-            'content' => 'I am learning Laravel and building applications with PHP and AI.',
-        ]);
+        ->postJson(
+            route('ai.writing.improve-article'),
+            [
+                'content' => 'I am learning Laravel and building applications with PHP and AI.',
+            ]
+        );
 
     $response
         ->assertSuccessful()
@@ -207,6 +221,14 @@ public function test_user_can_improve_an_entire_article(): void
         ->assertJsonPath(
             'article.content',
             'Improved article content with better clarity and flow.'
+        )
+        ->assertJsonPath(
+            'article.category.id',
+            1
+        )
+        ->assertJsonPath(
+            'article.category.name',
+            'Web Development'
         )
         ->assertJsonPath(
             'article.tags.0.name',

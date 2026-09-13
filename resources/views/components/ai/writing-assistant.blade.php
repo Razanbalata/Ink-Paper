@@ -8,11 +8,17 @@
 
     suggestedTags: [],
     selectedTags: [],
+
+    suggestedCategory: null,
+
     improvedArticle: null,
+
     error: '',
 
     async improveWriting() {
-        const contentField = document.querySelector('textarea[name=content]');
+        const contentField = document.querySelector(
+            `textarea[name='content']`
+        );
 
         if (!contentField || !contentField.value.trim()) {
             this.error = 'Write some content first.';
@@ -30,9 +36,6 @@
         this.action = 'improve';
         this.error = '';
         this.result = '';
-        this.titles = [];
-        this.excerpt = '';
-        this.suggestedTags = [];
 
         try {
             const response = await fetch(
@@ -58,6 +61,7 @@
             }
 
             this.result = data.result || '';
+
         } catch (error) {
             console.error(error);
             this.error = error.message;
@@ -67,8 +71,11 @@
         }
     },
 
+
     async generateTitle() {
-        const contentField = document.querySelector('textarea[name=content]');
+        const contentField = document.querySelector(
+            `textarea[name='content']`
+        );
 
         if (!contentField || !contentField.value.trim()) {
             this.error = 'Write some content first.';
@@ -86,9 +93,6 @@
         this.action = 'title';
         this.error = '';
         this.titles = [];
-        this.result = '';
-        this.excerpt = '';
-        this.suggestedTags = [];
 
         try {
             const response = await fetch(
@@ -114,6 +118,7 @@
             }
 
             this.titles = data.titles || [];
+
         } catch (error) {
             console.error(error);
             this.error = error.message;
@@ -123,8 +128,11 @@
         }
     },
 
+
     async generateExcerpt() {
-        const contentField = document.querySelector('textarea[name=content]');
+        const contentField = document.querySelector(
+            `textarea[name='content']`
+        );
 
         if (!contentField || !contentField.value.trim()) {
             this.error = 'Write some content first.';
@@ -142,9 +150,6 @@
         this.action = 'excerpt';
         this.error = '';
         this.excerpt = '';
-        this.result = '';
-        this.titles = [];
-        this.suggestedTags = [];
 
         try {
             const response = await fetch(
@@ -170,6 +175,7 @@
             }
 
             this.excerpt = data.excerpt || '';
+
         } catch (error) {
             console.error(error);
             this.error = error.message;
@@ -179,8 +185,11 @@
         }
     },
 
+
     async suggestTags() {
-        const contentField = document.querySelector('textarea[name=content]');
+        const contentField = document.querySelector(
+            `textarea[name='content']`
+        );
 
         if (!contentField || !contentField.value.trim()) {
             this.error = 'Write some content first.';
@@ -198,10 +207,6 @@
         this.action = 'tags';
         this.error = '';
         this.suggestedTags = [];
-        this.selectedTags = [];
-        this.result = '';
-        this.titles = [];
-        this.excerpt = '';
 
         try {
             const response = await fetch(
@@ -227,6 +232,7 @@
             }
 
             this.suggestedTags = data.tags || [];
+
         } catch (error) {
             console.error(error);
             this.error = error.message;
@@ -235,9 +241,11 @@
             this.action = null;
         }
     },
+
+
     async improveArticle() {
         const contentField = document.querySelector(
-            'textarea[name=content]'
+            `textarea[name='content']`
         );
 
         if (!contentField || !contentField.value.trim()) {
@@ -261,6 +269,7 @@
         this.excerpt = '';
         this.suggestedTags = [];
         this.selectedTags = [];
+        this.suggestedCategory = null;
         this.improvedArticle = null;
 
         try {
@@ -287,6 +296,10 @@
             }
 
             this.improvedArticle = data.article || null;
+
+            this.suggestedCategory =
+                this.improvedArticle?.category || null;
+
         } catch (error) {
             console.error(error);
             this.error = error.message;
@@ -295,266 +308,8 @@
             this.action = null;
         }
     },
-    async toggleTag(tag) {
-        const index = this.selectedTags.findIndex(
-            selected => selected.name === tag.name
-        );
 
-        if (index !== -1) {
-            this.selectedTags.splice(index, 1);
-            this.removeTagFromForm(tag);
-            return;
-        }
 
-        this.selectedTags.push(tag);
-
-        await this.addTagToForm(tag);
-    },
-
-    async addTagToForm(tag) {
-        const form = document.querySelector('form');
-
-        if (!form) return;
-
-        /*
-         * Existing tag
-         */
-        if (tag.exists && tag.id) {
-            const checkboxes = form.querySelectorAll(
-                `input[name='tags[]']`
-            );
-
-            const checkbox = Array.from(checkboxes).find(
-                input => input.value === String(tag.id)
-            );
-
-            if (checkbox) {
-                checkbox.checked = true;
-                checkbox.dispatchEvent(
-                    new Event('change', { bubbles: true })
-                );
-            }
-
-            return;
-        }
-
-        /*
-         * New tag
-         */
-        try {
-            const response = await fetch(
-                '{{ route('ai.writing.tags.add') }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    },
-                    body: JSON.stringify({
-                        name: tag.name,
-                    }),
-                }
-            );
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(
-                    data.message || 'Failed to create tag.'
-                );
-            }
-
-            const createdTag = data.tag;
-
-            /*
-             * Update the local AI suggestion.
-             *
-             * It is now a real database tag.
-             */
-            tag.id = createdTag.id;
-            tag.exists = true;
-
-            const tagsContainer = document.querySelector(
-                '#post-tags-container'
-            );
-
-            if (!tagsContainer) return;
-
-            // Remove No tags available message.
-
-            const emptyMessage = document.querySelector(
-                '#no-tags-message'
-            );
-
-            if (emptyMessage) {
-                emptyMessage.remove();
-            }
-
-            /*
-             * Check whether the tag is already displayed.
-             */
-            const existingCheckboxes = tagsContainer.querySelectorAll(
-                `input[name='tags[]']`
-            );
-
-            const alreadyExists = Array.from(existingCheckboxes).find(
-                input => input.value === String(createdTag.id)
-            );
-
-            if (alreadyExists) {
-                alreadyExists.checked = true;
-                return;
-            }
-
-            /*
-             * Create the label.
-             */
-            const label = document.createElement('label');
-
-            label.className =
-                'inline-flex cursor-pointer items-center gap-2 rounded-lg border border-primary bg-primary/5 px-3 py-1.5 text-xs font-medium text-primary transition';
-
-            label.setAttribute(
-                'data-ai-tag',
-                createdTag.name
-            );
-
-            /*
-             * Create checkbox.
-             */
-            const checkbox = document.createElement('input');
-
-            checkbox.type = 'checkbox';
-            checkbox.name = 'tags[]';
-            checkbox.value = createdTag.id;
-            checkbox.checked = true;
-
-            checkbox.className =
-                'rounded border-border text-primary focus:ring-primary';
-
-            /*
-             * Create tag text.
-             */
-            const text = document.createElement('span');
-
-            text.textContent = '#' + createdTag.name;
-
-            /*
-             * Build label.
-             */
-            label.appendChild(checkbox);
-            label.appendChild(text);
-
-            tagsContainer.appendChild(label);
-
-        } catch (error) {
-            console.error(error);
-
-            const index = this.selectedTags.findIndex(
-                selected => selected.name === tag.name
-            );
-
-            if (index !== -1) {
-                this.selectedTags.splice(index, 1);
-            }
-
-            this.error = error.message;
-        }
-    },
-
-    removeTagFromForm(tag) {
-        const form = document.querySelector('form');
-
-        if (!form) return;
-
-        /*
-         * If the tag has an ID, simply uncheck it.
-         */
-        if (tag.id) {
-            const checkboxes = form.querySelectorAll(
-                `input[name='tags[]']`
-            );
-
-            const checkbox = Array.from(checkboxes).find(
-                input => input.value === String(tag.id)
-            );
-
-            if (checkbox) {
-                checkbox.checked = false;
-            }
-
-            return;
-        }
-
-        /*
-         * Fallback for a tag that has not received an ID yet.
-         */
-        const labels = form.querySelectorAll(
-            'label[data-ai-tag]'
-        );
-
-        const label = Array.from(labels).find(
-            element => element.dataset.aiTag === tag.name
-        );
-
-        if (label) {
-            label.remove();
-        }
-    },
-
-    useTitle(title) {
-        const titleField = document.querySelector(
-            `input[name='title']`
-        );
-
-        if (!titleField || !title) return;
-
-        titleField.value = title;
-
-        titleField.dispatchEvent(
-            new Event('input', {
-                bubbles: true
-            })
-        );
-
-        this.titles = [];
-    },
-
-    useExcerpt() {
-        const excerptField = document.querySelector(
-            `textarea[name='excerpt']`
-        );
-
-        if (!excerptField || !this.excerpt) return;
-
-        excerptField.value = this.excerpt;
-
-        excerptField.dispatchEvent(
-            new Event('input', {
-                bubbles: true
-            })
-        );
-
-        this.excerpt = '';
-    },
-
-    useResult() {
-        const contentField = document.querySelector(
-            `textarea[name='content']`
-        );
-
-        if (!contentField || !this.result) return;
-
-        contentField.value = this.result;
-
-        contentField.dispatchEvent(
-            new Event('input', {
-                bubbles: true
-            })
-        );
-
-        this.result = '';
-    },
     useImprovedTitle() {
         if (!this.improvedArticle?.title) return;
 
@@ -572,6 +327,8 @@
             })
         );
     },
+
+
     useImprovedExcerpt() {
         if (!this.improvedArticle?.excerpt) return;
 
@@ -589,6 +346,8 @@
             })
         );
     },
+
+
     useImprovedContent() {
         if (!this.improvedArticle?.content) return;
 
@@ -606,687 +365,799 @@
             })
         );
     },
+
+
+    useImprovedCategory() {
+        if (!this.improvedArticle?.category?.id) return;
+
+        const categoryField = document.querySelector(
+            `select[name='category_id']`
+        );
+
+        if (!categoryField) return;
+
+        categoryField.value = String(
+            this.improvedArticle.category.id
+        );
+
+        categoryField.dispatchEvent(
+            new Event('change', {
+                bubbles: true
+            })
+        );
+    },
+
+
+    async addTagToForm(tag) {
+        if (!tag?.name) return;
+
+        const form = document.querySelector(
+            'form'
+        );
+
+        const container = document.getElementById(
+            'post-tags-container'
+        );
+
+        if (!form || !container) return;
+
+        let tagId = tag.id;
+
+        /*
+        |--------------------------------------------------------------------------
+        | Existing Tag
+        |--------------------------------------------------------------------------
+        */
+
+        if (tag.exists && tag.id) {
+            const checkboxes = form.querySelectorAll(
+                `input[name='tags[]']`
+            );
+
+            const checkbox = Array.from(checkboxes).find(
+                input => input.value === String(tag.id)
+            );
+
+            if (checkbox) {
+                checkbox.checked = true;
+
+                checkbox.dispatchEvent(
+                    new Event('change', {
+                        bubbles: true
+                    })
+                );
+
+                return;
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Create New Tag
+        |--------------------------------------------------------------------------
+        */
+
+        if (!tag.id) {
+            const response = await fetch(
+                '{{ route('ai.writing.tags.add') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    },
+                    body: JSON.stringify({
+                        name: tag.name,
+                    }),
+                }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(
+                    data.message || 'Failed to create tag.'
+                );
+            }
+
+            tagId = data.tag.id;
+
+            tag.id = data.tag.id;
+            tag.exists = true;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Check if already in the form
+        |--------------------------------------------------------------------------
+        */
+
+        const existingCheckboxes = form.querySelectorAll(
+            `input[name='tags[]']`
+        );
+
+        const existingCheckbox = Array.from(
+            existingCheckboxes
+        ).find(
+            input => input.value === String(tagId)
+        );
+
+        if (existingCheckbox) {
+            existingCheckbox.checked = true;
+
+            existingCheckbox.dispatchEvent(
+                new Event('change', {
+                    bubbles: true
+                })
+            );
+
+            return;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Remove Empty State
+        |--------------------------------------------------------------------------
+        */
+
+        const emptyMessage = document.getElementById(
+            'no-tags-message'
+        );
+
+        if (emptyMessage) {
+            emptyMessage.remove();
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Create Tag Checkbox
+        |--------------------------------------------------------------------------
+        */
+
+        const label = document.createElement('label');
+
+        label.className =
+            'inline-flex cursor-pointer items-center gap-2 rounded-lg border border-primary bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary transition';
+
+        label.dataset.tagId = tagId;
+
+        const checkbox = document.createElement('input');
+
+        checkbox.type = 'checkbox';
+        checkbox.name = 'tags[]';
+        checkbox.value = tagId;
+        checkbox.checked = true;
+
+        checkbox.className =
+            'rounded border-border text-primary focus:ring-primary';
+
+        const span = document.createElement('span');
+
+        span.textContent = '#' + tag.name;
+
+        label.appendChild(checkbox);
+        label.appendChild(span);
+
+        container.appendChild(label);
+    },
+
+
+    toggleTag(tag) {
+        if (!tag?.name) return;
+
+        const index = this.selectedTags.findIndex(
+            selected =>
+            selected.name.toLowerCase() ===
+            tag.name.toLowerCase()
+        );
+
+        if (index !== -1) {
+            this.selectedTags.splice(index, 1);
+
+            this.removeTagFromForm(tag);
+
+            return;
+        }
+
+        this.selectedTags.push(tag);
+
+        this.addTagToForm(tag);
+    },
+
+
+    removeTagFromForm(tag) {
+        if (!tag?.id) return;
+
+        const form = document.querySelector(
+            'form'
+        );
+
+        if (!form) return;
+
+        const checkboxes = form.querySelectorAll(
+            `input[name='tags[]']`
+        );
+
+        const checkbox = Array.from(checkboxes).find(
+            input => input.value === String(tag.id)
+        );
+
+        if (!checkbox) return;
+
+        checkbox.checked = false;
+
+        checkbox.dispatchEvent(
+            new Event('change', {
+                bubbles: true
+            })
+        );
+    },
+
+
     async applyAllImprovements() {
         if (!this.improvedArticle) return;
 
         this.useImprovedTitle();
         this.useImprovedExcerpt();
         this.useImprovedContent();
+        this.useImprovedCategory();
 
         const tags = this.improvedArticle.tags || [];
 
         for (const tag of tags) {
+
             const alreadySelected = this.selectedTags.some(
-                selected => selected.name === tag.name
+                selected =>
+                selected.name.toLowerCase() ===
+                tag.name.toLowerCase()
             );
 
             if (!alreadySelected) {
                 this.selectedTags.push(tag);
+
                 await this.addTagToForm(tag);
             }
         }
     }
+}" class="space-y-4">
 
-}" class="overflow-hidden rounded-2xl border border-border bg-white">
-   {{-- Header --}}
-    <div class="border-b border-border bg-paper px-5 py-4">
-        <div class="flex flex-col gap-4">
+    {{-- Header --}}
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 
-            <div>
-                <div class="flex items-center gap-2">
-                    <span class="text-sm font-bold text-ink">
-                        Ink AI
-                    </span>
+        <div>
+            <div class="flex items-center gap-2">
 
-                    <span
-                        class="rounded-full bg-primary/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary"
-                    >
-                        Writing Aid
-                    </span>
+                <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                            d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z" />
+
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                            d="M19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8L19 16z" />
+                    </svg>
                 </div>
 
-                <p class="mt-1 text-xs text-muted">
-                    Use AI to improve and shape your article.
-                </p>
-            </div>
+                <div>
+                    <h3 class="text-sm font-bold text-ink">
+                        Ink AI
+                    </h3>
 
-            <div class="flex flex-wrap items-center gap-2">
+                    <p class="text-xs text-muted">
+                        AI-powered writing assistance
+                    </p>
+                </div>
 
-                {{-- Improve Article --}}
-                <button
-                    type="button"
-                    @click="improveArticle()"
-                    :disabled="loading"
-                    class="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-white transition hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                    <template x-if="!(loading && action === 'article')">
-                        <span class="flex items-center gap-2">
-                            <svg
-                                class="h-3.5 w-3.5"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-width="1.8"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M12 3l1.45 5.55L19 10l-5.55 1.45L12 17l-1.45-5.55L5 10l5.55-1.45L12 3Z"
-                                />
-
-                                <path
-                                    stroke-width="1.8"
-                                    stroke-linecap="round"
-                                    d="M19 16v5M16.5 18.5h5"
-                                />
-                            </svg>
-
-                            Improve Article
-                        </span>
-                    </template>
-
-                    <template x-if="loading && action === 'article'">
-                        <span class="flex items-center gap-2">
-                            <svg
-                                class="h-3.5 w-3.5 animate-spin"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                            >
-                                <circle
-                                    class="opacity-25"
-                                    cx="12"
-                                    cy="12"
-                                    r="10"
-                                    stroke="currentColor"
-                                    stroke-width="3"
-                                />
-
-                                <path
-                                    class="opacity-75"
-                                    fill="currentColor"
-                                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                                />
-                            </svg>
-
-                            Improving Article...
-                        </span>
-                    </template>
-                </button>
-
-                {{-- Improve Writing --}}
-                <button
-                    type="button"
-                    @click="improveWriting()"
-                    :disabled="loading"
-                    class="inline-flex items-center justify-center gap-2 rounded-xl bg-ink px-4 py-2.5 text-xs font-bold text-white transition hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                    <template x-if="!(loading && action === 'improve')">
-                        <span class="flex items-center gap-2">
-                            <svg
-                                class="h-3.5 w-3.5"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-width="1.8"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M12 3l1.45 5.55L19 10l-5.55 1.45L12 17l-1.45-5.55L5 10l5.55-1.45L12 3Z"
-                                />
-
-                                <path
-                                    stroke-width="1.8"
-                                    stroke-linecap="round"
-                                    d="M19 16v5M16.5 18.5h5"
-                                />
-                            </svg>
-
-                            Improve Writing
-                        </span>
-                    </template>
-
-                    <template x-if="loading && action === 'improve'">
-                        <span class="flex items-center gap-2">
-                            <svg
-                                class="h-3.5 w-3.5 animate-spin"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                            >
-                                <circle
-                                    class="opacity-25"
-                                    cx="12"
-                                    cy="12"
-                                    r="10"
-                                    stroke="currentColor"
-                                    stroke-width="3"
-                                />
-
-                                <path
-                                    class="opacity-75"
-                                    fill="currentColor"
-                                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                                />
-                            </svg>
-
-                            Improving...
-                        </span>
-                    </template>
-                </button>
-
-                {{-- Generate Title --}}
-                <button
-                    type="button"
-                    @click="generateTitle()"
-                    :disabled="loading"
-                    class="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-white px-4 py-2.5 text-xs font-bold text-ink transition hover:-translate-y-0.5 hover:bg-paper hover:shadow-sm active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                    <template x-if="!(loading && action === 'title')">
-                        <span class="flex items-center gap-2">
-                            <svg
-                                class="h-3.5 w-3.5"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    d="M4 6h16M4 12h10M4 18h7"
-                                    stroke="currentColor"
-                                    stroke-width="1.8"
-                                    stroke-linecap="round"
-                                />
-                            </svg>
-
-                            Generate Title
-                        </span>
-                    </template>
-
-                    <template x-if="loading && action === 'title'">
-                        <span class="flex items-center gap-2">
-                            <svg
-                                class="h-3.5 w-3.5 animate-spin"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                            >
-                                <circle
-                                    class="opacity-25"
-                                    cx="12"
-                                    cy="12"
-                                    r="10"
-                                    stroke="currentColor"
-                                    stroke-width="3"
-                                />
-
-                                <path
-                                    class="opacity-75"
-                                    fill="currentColor"
-                                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                                />
-                            </svg>
-
-                            Generating...
-                        </span>
-                    </template>
-                </button>
-
-                {{-- Generate Excerpt --}}
-                <button
-                    type="button"
-                    @click="generateExcerpt()"
-                    :disabled="loading"
-                    class="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-white px-4 py-2.5 text-xs font-bold text-ink transition hover:-translate-y-0.5 hover:bg-paper hover:shadow-sm active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                    <template x-if="!(loading && action === 'excerpt')">
-                        <span class="flex items-center gap-2">
-                            <svg
-                                class="h-3.5 w-3.5"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    d="M4 6h16M4 12h12M4 18h8"
-                                    stroke="currentColor"
-                                    stroke-width="1.8"
-                                    stroke-linecap="round"
-                                />
-                            </svg>
-
-                            Generate Excerpt
-                        </span>
-                    </template>
-
-                    <template x-if="loading && action === 'excerpt'">
-                        <span class="flex items-center gap-2">
-                            <svg
-                                class="h-3.5 w-3.5 animate-spin"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                            >
-                                <circle
-                                    class="opacity-25"
-                                    cx="12"
-                                    cy="12"
-                                    r="10"
-                                    stroke="currentColor"
-                                    stroke-width="3"
-                                />
-
-                                <path
-                                    class="opacity-75"
-                                    fill="currentColor"
-                                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                                />
-                            </svg>
-
-                            Generating...
-                        </span>
-                    </template>
-                </button>
-
-                {{-- Suggest Tags --}}
-                <button
-                    type="button"
-                    @click="suggestTags()"
-                    :disabled="loading"
-                    class="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-white px-4 py-2.5 text-xs font-bold text-ink transition hover:-translate-y-0.5 hover:bg-paper hover:shadow-sm active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                    <template x-if="!(loading && action === 'tags')">
-                        <span class="flex items-center gap-2">
-                            <svg
-                                class="h-4 w-4"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="1.8"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M7 7h10M7 12h6M7 17h10"
-                                />
-                            </svg>
-
-                            Suggest Tags
-                        </span>
-                    </template>
-
-                    <template x-if="loading && action === 'tags'">
-                        <span class="flex items-center gap-2">
-                            <svg
-                                class="h-4 w-4 animate-spin"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                            >
-                                <circle
-                                    class="opacity-25"
-                                    cx="12"
-                                    cy="12"
-                                    r="9"
-                                    stroke="currentColor"
-                                    stroke-width="3"
-                                />
-
-                                <path
-                                    class="opacity-75"
-                                    fill="currentColor"
-                                    d="M21 12a9 9 0 0 0-9-9v3a6 6 0 0 1 6 6h3z"
-                                />
-                            </svg>
-
-                            Suggesting...
-                        </span>
-                    </template>
-                </button>
             </div>
         </div>
+
+
+        {{-- Improve Article --}}
+        <button type="button" @click="improveArticle()" :disabled="loading"
+            class="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-white transition hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60">
+
+            <template x-if="!(loading && action === 'article')">
+                <span class="flex items-center gap-2">
+
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                            d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z" />
+
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                            d="M19 16l.8 2.2L22 19l-2.2.8L19 19l-2.2-.8L19 16z" />
+                    </svg>
+
+                    Improve Article
+
+                </span>
+            </template>
+
+
+            <template x-if="loading && action === 'article'">
+                <span class="flex items-center gap-2">
+
+                    <svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                            stroke-width="4" />
+
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                    </svg>
+
+                    Improving Article...
+
+                </span>
+            </template>
+
+        </button>
+
     </div>
+
+
+    {{-- AI Actions --}}
+    <div class="grid gap-2 sm:grid-cols-3">
+
+        {{-- Improve Writing --}}
+        <button type="button" @click="improveWriting()" :disabled="loading"
+            class="rounded-xl border border-border bg-white px-3 py-2.5 text-xs font-semibold text-ink transition hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-60">
+            <span x-show="!(loading && action === 'improve')">
+                Improve Writing
+            </span>
+
+            <span x-show="loading && action === 'improve'" x-cloak>
+                Improving...
+            </span>
+        </button>
+
+
+        {{-- Generate Title --}}
+        <button type="button" @click="generateTitle()" :disabled="loading"
+            class="rounded-xl border border-border bg-white px-3 py-2.5 text-xs font-semibold text-ink transition hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-60">
+            <span x-show="!(loading && action === 'title')">
+                Generate Titles
+            </span>
+
+            <span x-show="loading && action === 'title'" x-cloak>
+                Generating...
+            </span>
+        </button>
+
+
+        {{-- Generate Excerpt --}}
+        <button type="button" @click="generateExcerpt()" :disabled="loading"
+            class="rounded-xl border border-border bg-white px-3 py-2.5 text-xs font-semibold text-ink transition hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-60">
+            <span x-show="!(loading && action === 'excerpt')">
+                Generate Excerpt
+            </span>
+
+            <span x-show="loading && action === 'excerpt'" x-cloak>
+                Generating...
+            </span>
+        </button>
+
+    </div>
+
+
+    {{-- Suggest Tags --}}
+    <button type="button" @click="suggestTags()" :disabled="loading"
+        class="w-full rounded-xl border border-border bg-white px-3 py-2.5 text-xs font-semibold text-ink transition hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-60">
+
+        <span x-show="!(loading && action === 'tags')">
+            Suggest Tags
+        </span>
+
+        <span x-show="loading && action === 'tags'" x-cloak>
+            Suggesting Tags...
+        </span>
+
+    </button>
+
 
     {{-- Error --}}
-    <div
-        x-show="error"
-        x-cloak
-        class="mx-5 mt-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs font-medium text-rose-600"
-        x-text="error"
-    ></div>
-
-    {{-- Improve Article Result --}}
-    <div
-        x-show="improvedArticle"
-        x-cloak
-        class="m-5 overflow-hidden rounded-2xl border border-primary/20 bg-white shadow-sm"
-    >
-        {{-- Result Header --}}
-        <div
-            class="flex flex-col gap-3 border-b border-border bg-paper px-4 py-4 sm:flex-row sm:items-center sm:justify-between"
-        >
-            <div>
-                <div class="flex items-center gap-2">
-                    <span class="text-xs font-bold uppercase tracking-wider text-ink">
-                        Article Improvement
-                    </span>
-
-                    <span
-                        class="rounded-full bg-primary/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary"
-                    >
-                        AI
-                    </span>
-                </div>
-
-                <p class="mt-1 text-[11px] text-muted">
-                    Review each suggestion before applying it to your article.
-                </p>
-            </div>
-
-            <button
-                type="button"
-                @click="applyAllImprovements()"
-                class="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-3 py-2 text-xs font-bold text-white transition hover:opacity-90 active:scale-95"
-            >
-                <svg
-                    class="h-3.5 w-3.5"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.8"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M5 13l4 4L19 7"
-                    />
-                </svg>
-
-                Apply All
-            </button>
+    <template x-if="error">
+        <div class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs font-medium text-rose-600">
+            <span x-text="error"></span>
         </div>
+    </template>
 
-        <div class="divide-y divide-border">
 
-            {{-- Improved Title --}}
-            <div class="p-4">
-                <div class="mb-2 flex items-center justify-between gap-3">
-                    <div>
-                        <p class="text-[10px] font-bold uppercase tracking-wider text-muted">
-                            Title
-                        </p>
-                    </div>
+    {{-- Improved Writing Result --}}
+    <template x-if="result">
+        <div class="rounded-2xl border border-border bg-white p-4 sm:p-5">
 
-                    <button
-                        type="button"
-                        @click="useImprovedTitle()"
-                        class="rounded-lg border border-border bg-white px-3 py-1.5 text-[11px] font-bold text-ink transition hover:border-primary hover:text-primary active:scale-95"
-                    >
-                        Use Title
-                    </button>
-                </div>
+            <div class="mb-3 flex items-center justify-between">
 
-                <div
-                    class="rounded-xl border border-border bg-paper px-4 py-3"
-                >
-                    <p
-                        class="text-sm font-semibold leading-6 text-ink"
-                        x-text="improvedArticle?.title"
-                    ></p>
-                </div>
+                <span class="text-xs font-bold uppercase tracking-wider text-ink">
+                    Improved Writing
+                </span>
+
+                <span
+                    class="rounded-full bg-primary/10 px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-primary">
+                    AI
+                </span>
+
             </div>
 
-            {{-- Improved Excerpt --}}
-            <div class="p-4">
-                <div class="mb-2 flex items-center justify-between gap-3">
-                    <div>
-                        <p class="text-[10px] font-bold uppercase tracking-wider text-muted">
-                            Excerpt
-                        </p>
-                    </div>
+            <div class="whitespace-pre-line text-sm leading-7 text-ink" x-text="result"></div>
 
-                    <button
-                        type="button"
-                        @click="useImprovedExcerpt()"
-                        class="rounded-lg border border-border bg-white px-3 py-1.5 text-[11px] font-bold text-ink transition hover:border-primary hover:text-primary active:scale-95"
-                    >
-                        Use Excerpt
-                    </button>
-                </div>
-
-                <div
-                    class="rounded-xl border border-border bg-paper px-4 py-3"
-                >
-                    <p
-                        class="text-sm leading-6 text-ink"
-                        x-text="improvedArticle?.excerpt"
-                    ></p>
-                </div>
-            </div>
-
-            {{-- Improved Content --}}
-            <div class="p-4">
-                <div class="mb-2 flex items-center justify-between gap-3">
-                    <div>
-                        <p class="text-[10px] font-bold uppercase tracking-wider text-muted">
-                            Content
-                        </p>
-                    </div>
-
-                    <button
-                        type="button"
-                        @click="useImprovedContent()"
-                        class="rounded-lg border border-border bg-white px-3 py-1.5 text-[11px] font-bold text-ink transition hover:border-primary hover:text-primary active:scale-95"
-                    >
-                        Use Content
-                    </button>
-                </div>
-
-                <div
-                    class="max-h-72 overflow-y-auto whitespace-pre-wrap rounded-xl border border-border bg-paper px-4 py-3"
-                >
-                    <p
-                        class="text-sm leading-7 text-ink"
-                        x-text="improvedArticle?.content"
-                    ></p>
-                </div>
-            </div>
-
-            {{-- Improved Tags --}}
-            <div class="p-4">
-                <div class="mb-3">
-                    <p class="text-[10px] font-bold uppercase tracking-wider text-muted">
-                        Suggested Tags
-                    </p>
-
-                    <p class="mt-0.5 text-[11px] text-muted">
-                        Click a tag to add or remove it from the article.
-                    </p>
-                </div>
-
-                <div class="flex flex-wrap gap-2">
-                    <template
-                        x-for="tag in (improvedArticle?.tags || [])"
-                        :key="tag.name"
-                    >
-                        <button
-                            type="button"
-                            @click="toggleTag(tag)"
-                            :class="selectedTags.some(selected => selected.name === tag.name)
-                                ? 'border-primary bg-primary text-white'
-                                : 'border-border bg-white text-ink hover:bg-paper'"
-                            class="inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium shadow-sm transition"
-                        >
-                            <span x-text="'#' + tag.name"></span>
-
-                            <span
-                                x-show="tag.exists"
-                                class="text-[9px] opacity-70"
-                            >
-                                Existing
-                            </span>
-
-                            <span
-                                x-show="!tag.exists"
-                                class="text-[9px] opacity-70"
-                            >
-                                New
-                            </span>
-                        </button>
-                    </template>
-                </div>
-            </div>
         </div>
-    </div>
+    </template>
+
+
+    {{-- Generated Titles --}}
+    <template x-if="titles.length">
+        <div class="rounded-2xl border border-border bg-white p-4 sm:p-5">
+
+            <div class="mb-4 flex items-center justify-between">
+
+                <span class="text-xs font-bold uppercase tracking-wider text-ink">
+                    Suggested Titles
+                </span>
+
+                <span
+                    class="rounded-full bg-primary/10 px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-primary">
+                    AI
+                </span>
+
+            </div>
+
+            <div class="space-y-2">
+
+                <template x-for="title in titles" :key="title">
+
+                    <button type="button"
+                        @click="
+                            document.querySelector('input[name=title]').value = title;
+                            document.querySelector('input[name=title]').dispatchEvent(new Event('input', { bubbles: true }));
+                        "
+                        class="block w-full rounded-xl border border-border bg-paper p-3 text-left text-sm font-medium text-ink transition hover:border-primary hover:bg-primary/5"
+                        x-text="title"></button>
+
+                </template>
+
+            </div>
+
+        </div>
+    </template>
+
+
+    {{-- Generated Excerpt --}}
+    <template x-if="excerpt">
+        <div class="rounded-2xl border border-border bg-white p-4 sm:p-5">
+
+            <div class="mb-3 flex items-center justify-between">
+
+                <span class="text-xs font-bold uppercase tracking-wider text-ink">
+                    Suggested Excerpt
+                </span>
+
+                <span
+                    class="rounded-full bg-primary/10 px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-primary">
+                    AI
+                </span>
+
+            </div>
+
+            <button type="button"
+                @click="
+                    document.querySelector('textarea[name=excerpt]').value = excerpt;
+                    document.querySelector('textarea[name=excerpt]').dispatchEvent(new Event('input', { bubbles: true }));
+                "
+                class="w-full rounded-xl border border-border bg-paper p-3 text-left text-sm leading-6 text-ink transition hover:border-primary hover:bg-primary/5"
+                x-text="excerpt"></button>
+
+        </div>
+    </template>
+
 
     {{-- Suggested Tags --}}
-    <div
-        x-show="suggestedTags.length"
-        x-cloak
-        class="m-5 rounded-xl border border-border bg-paper p-4"
-    >
-        <div class="mb-3">
-            <p class="text-xs font-bold uppercase tracking-wider text-ink">
-                Suggested Tags
-            </p>
+    <template x-if="suggestedTags.length">
+        <div class="rounded-2xl border border-border bg-white p-4 sm:p-5">
 
-            <p class="mt-0.5 text-[11px] text-muted">
-                Click a tag to add it to your article.
-            </p>
-        </div>
+            <div class="mb-4 flex items-center justify-between">
 
-        <div class="flex flex-wrap gap-2">
-            <template
-                x-for="tag in suggestedTags"
-                :key="tag.name"
-            >
-                <button
-                    type="button"
-                    @click="toggleTag(tag)"
-                    :class="selectedTags.some(selected => selected.name === tag.name)
-                        ? 'border-primary bg-primary text-white'
-                        : 'border-border bg-white text-ink hover:bg-paper'"
-                    class="inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium shadow-sm transition"
-                >
-                    <span x-text="'#' + tag.name"></span>
+                <span class="text-xs font-bold uppercase tracking-wider text-ink">
+                    Suggested Tags
+                </span>
 
-                    <span
-                        x-show="tag.exists"
-                        class="text-[9px] opacity-70"
-                        x-text="'Existing'"
-                    ></span>
+                <span
+                    class="rounded-full bg-primary/10 px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-primary">
+                    AI
+                </span>
 
-                    <span
-                        x-show="!tag.exists"
-                        class="text-[9px] opacity-70"
-                        x-text="'New'"
-                    ></span>
-                </button>
-            </template>
-        </div>
-    </div>
-
-    {{-- Excerpt Result --}}
-    <div
-        x-show="excerpt"
-        x-cloak
-        class="m-5 rounded-xl border border-border bg-paper"
-    >
-        <div
-            class="flex items-center justify-between gap-3 border-b border-border px-4 py-3"
-        >
-            <div>
-                <p class="text-xs font-bold uppercase tracking-wider text-ink">
-                    Generated Excerpt
-                </p>
-
-                <p class="mt-0.5 text-[11px] text-muted">
-                    Review the excerpt before applying it.
-                </p>
             </div>
 
-            <button
-                type="button"
-                @click="useExcerpt()"
-                class="rounded-lg bg-primary px-3 py-1.5 text-xs font-bold text-white transition hover:opacity-90 active:scale-95"
-            >
-                Use Result
-            </button>
-        </div>
+            <div class="flex flex-wrap gap-2">
 
-        <div
-            class="px-4 py-4 text-sm leading-7 text-ink"
-            x-text="excerpt"
-        ></div>
-    </div>
+                <template x-for="tag in suggestedTags" :key="tag.name">
 
-    {{-- Title Suggestions --}}
-    <div
-        x-show="titles.length"
-        x-cloak
-        class="m-5 overflow-hidden rounded-2xl border border-border bg-white"
-    >
-        <div class="border-b border-border bg-paper px-4 py-3">
-            <p class="text-xs font-bold uppercase tracking-wider text-ink">
-                Title Suggestions
-            </p>
+                    <button type="button" @click="toggleTag(tag)"
+                        :class="selectedTags.some(
+                                selected =>
+                                selected.name.toLowerCase() ===
+                                tag.name.toLowerCase()
+                            ) ?
+                            'border-primary bg-primary text-white' :
+                            'border-border bg-white text-ink hover:bg-paper'"
+                        class="inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-semibold transition">
 
-            <p class="mt-0.5 text-[11px] text-muted">
-                Choose the one that fits your article best.
-            </p>
-        </div>
+                        <span x-text="'#' + tag.name"></span>
 
-        <div class="space-y-2 p-4">
-            <template
-                x-for="(title, index) in titles"
-                :key="index"
-            >
-                <button
-                    type="button"
-                    @click="useTitle(title)"
-                    class="group flex w-full items-center justify-between gap-4 rounded-xl border border-border bg-white px-4 py-3 text-left transition hover:-translate-y-0.5 hover:border-primary hover:shadow-sm active:translate-y-0"
-                >
-                    <span
-                        class="text-sm font-medium leading-6 text-ink"
-                        x-text="title"
-                    ></span>
+                        <span x-show="tag.exists" class="text-[9px] uppercase opacity-70">
+                            Existing
+                        </span>
 
-                    <span
-                        class="shrink-0 text-xs font-bold text-muted transition group-hover:text-primary"
-                    >
-                        Use
-                    </span>
-                </button>
-            </template>
-        </div>
-    </div>
+                        <span x-show="!tag.exists" class="text-[9px] uppercase opacity-70">
+                            New
+                        </span>
 
-    {{-- Improved Result --}}
-    <div
-        x-show="result"
-        x-cloak
-        class="m-5 overflow-hidden rounded-2xl border border-border bg-white"
-    >
-        <div
-            class="flex items-center justify-between gap-3 border-b border-border bg-paper px-4 py-3"
-        >
-            <div>
-                <p class="text-xs font-bold uppercase tracking-wider text-ink">
-                    Improved Version
-                </p>
+                    </button>
 
-                <p class="mt-0.5 text-[11px] text-muted">
-                    Review the result before applying it.
-                </p>
+                </template>
+
             </div>
 
-            <button
-                type="button"
-                @click="useResult()"
-                class="rounded-lg bg-primary px-3 py-1.5 text-xs font-bold text-white transition hover:opacity-90 active:scale-95"
-            >
-                Use Result
-            </button>
+        </div>
+    </template>
+
+
+    {{-- Improve Article Result --}}
+    <template x-if="improvedArticle">
+
+        <div class="overflow-hidden rounded-2xl border border-border bg-white">
+
+            {{-- Header --}}
+            <div
+                class="flex flex-col gap-3 border-b border-border p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+
+                <div>
+
+                    <div class="flex items-center gap-2">
+
+                        <h3 class="text-sm font-bold text-ink">
+                            Article Improvement
+                        </h3>
+
+                        <span
+                            class="rounded-full bg-primary/10 px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-primary">
+                            AI
+                        </span>
+
+                    </div>
+
+                    <p class="mt-1 text-xs text-muted">
+                        Review each suggestion before applying it to your article.
+                    </p>
+
+                </div>
+
+
+                {{-- Apply All --}}
+                <button type="button" @click="applyAllImprovements()"
+                    class="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-white transition hover:-translate-y-0.5 hover:shadow-md active:translate-y-0">
+
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+
+                    Apply All
+
+                </button>
+
+            </div>
+
+
+            <div class="divide-y divide-border">
+
+                {{-- Improved Title --}}
+                <div class="p-4 sm:p-5">
+
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+
+                        <div class="min-w-0">
+
+                            <span class="text-xs font-bold uppercase tracking-wider text-ink">
+                                Improved Title
+                            </span>
+
+                            <p class="mt-2 text-sm font-semibold leading-6 text-ink" x-text="improvedArticle?.title">
+                            </p>
+
+                        </div>
+
+
+                        <button type="button" @click="useImprovedTitle()"
+                            class="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-border bg-white px-3 py-2 text-xs font-bold text-ink transition hover:border-primary hover:text-primary active:scale-95">
+                            Use Title
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                {{-- Improved Excerpt --}}
+                <div class="p-4 sm:p-5">
+
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+
+                        <div class="min-w-0">
+
+                            <span class="text-xs font-bold uppercase tracking-wider text-ink">
+                                Improved Excerpt
+                            </span>
+
+                            <p class="mt-2 text-sm leading-6 text-muted" x-text="improvedArticle?.excerpt"></p>
+
+                        </div>
+
+
+                        <button type="button" @click="useImprovedExcerpt()"
+                            class="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-border bg-white px-3 py-2 text-xs font-bold text-ink transition hover:border-primary hover:text-primary active:scale-95">
+                            Use Excerpt
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                {{-- Suggested Category --}}
+                <div class="p-4 sm:p-5">
+
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+
+                        <div class="min-w-0">
+
+                            <div class="flex items-center gap-2">
+
+                                <span class="text-xs font-bold uppercase tracking-wider text-ink">
+                                    Suggested Category
+                                </span>
+
+                                <span
+                                    class="rounded-full bg-primary/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary">
+                                    AI
+                                </span>
+
+                            </div>
+
+
+                            <template x-if="improvedArticle?.category">
+
+                                <div class="mt-3">
+
+                                    <span
+                                        class="inline-flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3 py-1.5 text-xs font-semibold text-primary"
+                                        x-text="improvedArticle.category.name"></span>
+
+                                </div>
+
+                            </template>
+
+
+                            <template x-if="!improvedArticle?.category">
+
+                                <p class="mt-2 text-xs text-muted">
+                                    No suitable category was found.
+                                </p>
+
+                            </template>
+
+                        </div>
+
+
+                        <template x-if="improvedArticle?.category">
+
+                            <button type="button" @click="useImprovedCategory()"
+                                class="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-border bg-white px-3 py-2 text-xs font-bold text-ink transition hover:border-primary hover:text-primary active:scale-95">
+
+                                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 12h14m-7-7 7 7-7 7" />
+                                </svg>
+
+                                Use Category
+
+                            </button>
+
+                        </template>
+
+                    </div>
+
+                </div>
+
+
+                {{-- Improved Content --}}
+                <div class="p-4 sm:p-5">
+
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+
+                        <div class="min-w-0 flex-1">
+
+                            <span class="text-xs font-bold uppercase tracking-wider text-ink">
+                                Improved Content
+                            </span>
+
+                            <div class="mt-2 max-h-72 overflow-y-auto whitespace-pre-line rounded-xl bg-paper p-4 text-sm leading-7 text-ink"
+                                x-text="improvedArticle?.content"></div>
+
+                        </div>
+
+
+                        <button type="button" @click="useImprovedContent()"
+                            class="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-border bg-white px-3 py-2 text-xs font-bold text-ink transition hover:border-primary hover:text-primary active:scale-95">
+                            Use Content
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                {{-- Improved Tags --}}
+                <div class="p-4 sm:p-5">
+
+                    <div class="flex flex-col gap-4">
+
+                        <div>
+
+                            <div class="flex items-center gap-2">
+
+                                <span class="text-xs font-bold uppercase tracking-wider text-ink">
+                                    Suggested Tags
+                                </span>
+
+                                <span
+                                    class="rounded-full bg-primary/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary">
+                                    AI
+                                </span>
+
+                            </div>
+
+                            <p class="mt-1 text-xs text-muted">
+                                Click a tag to add or remove it from the article.
+                            </p>
+
+                        </div>
+
+
+                        <div class="flex flex-wrap gap-2">
+
+                            <template x-for="tag in (improvedArticle?.tags || [])" :key="tag.name">
+
+                                <button type="button" @click="toggleTag(tag)"
+                                    :class="selectedTags.some(
+                                            selected =>
+                                            selected.name.toLowerCase() ===
+                                            tag.name.toLowerCase()
+                                        ) ?
+                                        'border-primary bg-primary text-white' :
+                                        'border-border bg-white text-ink hover:bg-paper'"
+                                    class="inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-semibold transition">
+
+                                    <span x-text="'#' + tag.name"></span>
+
+                                    <span x-show="tag.exists" class="text-[9px] uppercase opacity-70">
+                                        Existing
+                                    </span>
+
+                                    <span x-show="!tag.exists" class="text-[9px] uppercase opacity-70">
+                                        New
+                                    </span>
+
+                                </button>
+
+                            </template>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
         </div>
 
-        <div
-            class="max-h-80 overflow-y-auto whitespace-pre-wrap px-4 py-4 text-sm leading-7 text-ink"
-            x-text="result"
-        ></div>
-    </div>
+    </template>
+
 </div>

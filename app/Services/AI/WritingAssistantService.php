@@ -7,6 +7,7 @@ use App\AI\Prompts\GenerateTitlePrompt;
 use App\AI\Prompts\ImproveArticlePrompt;
 use App\AI\Prompts\ImproveWritingPrompt;
 use App\AI\Prompts\SuggestTagsPrompt;
+use App\Models\Category;
 use App\Models\Tag;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
@@ -238,6 +239,16 @@ class WritingAssistantService
 
     public function improveArticle(string $content): array
     {
+        $categories = Category::query()
+            ->select('id', 'name')
+            ->orderBy('name')
+            ->get()
+            ->map(fn($category) => [
+                'id' => $category->id,
+                'name' => $category->name,
+            ])
+            ->all();
+
         $response = Http::withToken(config('ai.groq.api_key'))
             ->baseUrl(config('ai.groq.base_url'))
             ->timeout(60)
@@ -246,7 +257,7 @@ class WritingAssistantService
                 'messages' => [
                     [
                         'role' => 'system',
-                        'content' => ImproveArticlePrompt::system(),
+                        'content' => ImproveArticlePrompt::system($categories),
                     ],
                     [
                         'role' => 'user',
@@ -281,6 +292,29 @@ class WritingAssistantService
             );
         }
 
+        /*
+         * |--------------------------------------------------------------------------
+         * | Resolve Category
+         * |--------------------------------------------------------------------------
+         */
+
+        $category = null;
+
+        if (
+            isset($data['category']['id']) &&
+            is_numeric($data['category']['id'])
+        ) {
+            $category = Category::query()
+                ->select('id', 'name')
+                ->find((int) $data['category']['id']);
+        }
+
+        /*
+         * |--------------------------------------------------------------------------
+         * | Resolve Tags
+         * |--------------------------------------------------------------------------
+         */
+
         $tags = $data['tags'] ?? [];
 
         if (!is_array($tags)) {
@@ -288,28 +322,43 @@ class WritingAssistantService
         }
 
         $tags = collect($tags)
-            ->filter(fn($tag) => is_string($tag) && trim($tag) !== '')
+            ->filter(
+                fn($tag) =>
+                    is_string($tag) &&
+                    trim($tag) !== ''
+            )
             ->map(fn($tag) => trim($tag))
-            ->unique(fn($tag) => mb_strtolower($tag))
+            ->unique(
+                fn($tag) => mb_strtolower($tag)
+            )
             ->values();
 
-        $resolvedTags = $tags->map(function (string $tagName) {
-            $tag = Tag::whereRaw(
-                'LOWER(name) = ?',
-                [mb_strtolower($tagName)]
-            )->first();
+        $resolvedTags = $tags
+            ->map(function (string $tagName) {
+                $tag = Tag::whereRaw(
+                    'LOWER(name) = ?',
+                    [mb_strtolower($tagName)]
+                )->first();
 
-            return [
-                'name' => $tagName,
-                'exists' => $tag !== null,
-                'id' => $tag?->id,
-            ];
-        })->values()->all();
+                return [
+                    'name' => $tagName,
+                    'exists' => $tag !== null,
+                    'id' => $tag?->id,
+                ];
+            })
+            ->values()
+            ->all();
 
         return [
             'title' => $data['title'] ?? '',
             'excerpt' => $data['excerpt'] ?? '',
             'content' => $data['content'] ?? '',
+            'category' => $category
+                ? [
+                    'id' => $category->id,
+                    'name' => $category->name,
+                ]
+                : null,
             'tags' => $resolvedTags,
         ];
     }
