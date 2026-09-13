@@ -1,512 +1,634 @@
+<div x-data="{
+    loading: false,
+    action: null,
 
-<div
-    x-data="{
-        loading: false,
-        action: null,
+    result: '',
+    titles: [],
+    excerpt: '',
 
-        result: '',
-        titles: [],
-        excerpt: '',
+    suggestedTags: [],
+    selectedTags: [],
+    improvedArticle: null,
+    error: '',
 
-        suggestedTags: [],
-        selectedTags: [],
+    async improveWriting() {
+        const contentField = document.querySelector('textarea[name=content]');
 
-        error: '',
-
-        async improveWriting() {
-            const contentField = document.querySelector('textarea[name=content]');
-
-            if (!contentField || !contentField.value.trim()) {
-                this.error = 'Write some content first.';
-                this.result = '';
-                return;
-            }
-
-            if (contentField.value.trim().length < 10) {
-                this.error = 'Write at least 10 characters first.';
-                this.result = '';
-                return;
-            }
-
-            this.loading = true;
-            this.action = 'improve';
-            this.error = '';
+        if (!contentField || !contentField.value.trim()) {
+            this.error = 'Write some content first.';
             this.result = '';
-            this.titles = [];
-            this.excerpt = '';
-            this.suggestedTags = [];
+            return;
+        }
 
-            try {
-                const response = await fetch(
-                    '{{ route("ai.writing.improve") }}',
-                    {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        },
-                        body: JSON.stringify({
-                            content: contentField.value,
-                        }),
-                    }
-                );
-
-                const data = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(
-                        data.message || 'Something went wrong.'
-                    );
-                }
-
-                this.result = data.result || '';
-            } catch (error) {
-                console.error(error);
-                this.error = error.message;
-            } finally {
-                this.loading = false;
-                this.action = null;
-            }
-        },
-
-        async generateTitle() {
-            const contentField = document.querySelector('textarea[name=content]');
-
-            if (!contentField || !contentField.value.trim()) {
-                this.error = 'Write some content first.';
-                this.titles = [];
-                return;
-            }
-
-            if (contentField.value.trim().length < 10) {
-                this.error = 'Write at least 10 characters first.';
-                this.titles = [];
-                return;
-            }
-
-            this.loading = true;
-            this.action = 'title';
-            this.error = '';
-            this.titles = [];
+        if (contentField.value.trim().length < 10) {
+            this.error = 'Write at least 10 characters first.';
             this.result = '';
-            this.excerpt = '';
-            this.suggestedTags = [];
+            return;
+        }
 
-            try {
-                const response = await fetch(
-                    '{{ route("ai.writing.title") }}',
-                    {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        },
-                        body: JSON.stringify({
-                            content: contentField.value,
-                        }),
-                    }
-                );
+        this.loading = true;
+        this.action = 'improve';
+        this.error = '';
+        this.result = '';
+        this.titles = [];
+        this.excerpt = '';
+        this.suggestedTags = [];
 
-                const data = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(
-                        data.message || 'Something went wrong.'
-                    );
+        try {
+            const response = await fetch(
+                '{{ route('ai.writing.improve') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    },
+                    body: JSON.stringify({
+                        content: contentField.value,
+                    }),
                 }
+            );
 
-                this.titles = data.titles || [];
-            } catch (error) {
-                console.error(error);
-                this.error = error.message;
-            } finally {
-                this.loading = false;
-                this.action = null;
-            }
-        },
+            const data = await response.json();
 
-        async generateExcerpt() {
-            const contentField = document.querySelector('textarea[name=content]');
-
-            if (!contentField || !contentField.value.trim()) {
-                this.error = 'Write some content first.';
-                this.excerpt = '';
-                return;
+            if (!response.ok) {
+                throw new Error(
+                    data.message || 'Something went wrong.'
+                );
             }
 
-            if (contentField.value.trim().length < 10) {
-                this.error = 'Write at least 10 characters first.';
-                this.excerpt = '';
-                return;
-            }
+            this.result = data.result || '';
+        } catch (error) {
+            console.error(error);
+            this.error = error.message;
+        } finally {
+            this.loading = false;
+            this.action = null;
+        }
+    },
 
-            this.loading = true;
-            this.action = 'excerpt';
-            this.error = '';
-            this.excerpt = '';
-            this.result = '';
+    async generateTitle() {
+        const contentField = document.querySelector('textarea[name=content]');
+
+        if (!contentField || !contentField.value.trim()) {
+            this.error = 'Write some content first.';
             this.titles = [];
-            this.suggestedTags = [];
+            return;
+        }
 
-            try {
-                const response = await fetch(
-                    '{{ route("ai.writing.excerpt") }}',
-                    {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        },
-                        body: JSON.stringify({
-                            content: contentField.value,
-                        }),
-                    }
-                );
-
-                const data = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(
-                        data.message || 'Something went wrong.'
-                    );
-                }
-
-                this.excerpt = data.excerpt || '';
-            } catch (error) {
-                console.error(error);
-                this.error = error.message;
-            } finally {
-                this.loading = false;
-                this.action = null;
-            }
-        },
-
-        async suggestTags() {
-            const contentField = document.querySelector('textarea[name=content]');
-
-            if (!contentField || !contentField.value.trim()) {
-                this.error = 'Write some content first.';
-                this.suggestedTags = [];
-                return;
-            }
-
-            if (contentField.value.trim().length < 10) {
-                this.error = 'Write at least 10 characters first.';
-                this.suggestedTags = [];
-                return;
-            }
-
-            this.loading = true;
-            this.action = 'tags';
-            this.error = '';
-            this.suggestedTags = [];
-            this.selectedTags = [];
-            this.result = '';
+        if (contentField.value.trim().length < 10) {
+            this.error = 'Write at least 10 characters first.';
             this.titles = [];
-            this.excerpt = '';
+            return;
+        }
 
-            try {
-                const response = await fetch(
-                    '{{ route("ai.writing.tags") }}',
-                    {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        },
-                        body: JSON.stringify({
-                            content: contentField.value,
-                        }),
-                    }
-                );
+        this.loading = true;
+        this.action = 'title';
+        this.error = '';
+        this.titles = [];
+        this.result = '';
+        this.excerpt = '';
+        this.suggestedTags = [];
 
-                const data = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(
-                        data.message || 'Something went wrong.'
-                    );
+        try {
+            const response = await fetch(
+                '{{ route('ai.writing.title') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    },
+                    body: JSON.stringify({
+                        content: contentField.value,
+                    }),
                 }
+            );
 
-                this.suggestedTags = data.tags || [];
-            } catch (error) {
-                console.error(error);
-                this.error = error.message;
-            } finally {
-                this.loading = false;
-                this.action = null;
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(
+                    data.message || 'Something went wrong.'
+                );
             }
-        },
 
-        async toggleTag(tag) {
+            this.titles = data.titles || [];
+        } catch (error) {
+            console.error(error);
+            this.error = error.message;
+        } finally {
+            this.loading = false;
+            this.action = null;
+        }
+    },
+
+    async generateExcerpt() {
+        const contentField = document.querySelector('textarea[name=content]');
+
+        if (!contentField || !contentField.value.trim()) {
+            this.error = 'Write some content first.';
+            this.excerpt = '';
+            return;
+        }
+
+        if (contentField.value.trim().length < 10) {
+            this.error = 'Write at least 10 characters first.';
+            this.excerpt = '';
+            return;
+        }
+
+        this.loading = true;
+        this.action = 'excerpt';
+        this.error = '';
+        this.excerpt = '';
+        this.result = '';
+        this.titles = [];
+        this.suggestedTags = [];
+
+        try {
+            const response = await fetch(
+                '{{ route('ai.writing.excerpt') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    },
+                    body: JSON.stringify({
+                        content: contentField.value,
+                    }),
+                }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(
+                    data.message || 'Something went wrong.'
+                );
+            }
+
+            this.excerpt = data.excerpt || '';
+        } catch (error) {
+            console.error(error);
+            this.error = error.message;
+        } finally {
+            this.loading = false;
+            this.action = null;
+        }
+    },
+
+    async suggestTags() {
+        const contentField = document.querySelector('textarea[name=content]');
+
+        if (!contentField || !contentField.value.trim()) {
+            this.error = 'Write some content first.';
+            this.suggestedTags = [];
+            return;
+        }
+
+        if (contentField.value.trim().length < 10) {
+            this.error = 'Write at least 10 characters first.';
+            this.suggestedTags = [];
+            return;
+        }
+
+        this.loading = true;
+        this.action = 'tags';
+        this.error = '';
+        this.suggestedTags = [];
+        this.selectedTags = [];
+        this.result = '';
+        this.titles = [];
+        this.excerpt = '';
+
+        try {
+            const response = await fetch(
+                '{{ route('ai.writing.tags') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    },
+                    body: JSON.stringify({
+                        content: contentField.value,
+                    }),
+                }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(
+                    data.message || 'Something went wrong.'
+                );
+            }
+
+            this.suggestedTags = data.tags || [];
+        } catch (error) {
+            console.error(error);
+            this.error = error.message;
+        } finally {
+            this.loading = false;
+            this.action = null;
+        }
+    },
+    async improveArticle() {
+        const contentField = document.querySelector(
+            'textarea[name=content]'
+        );
+
+        if (!contentField || !contentField.value.trim()) {
+            this.error = 'Write some content first.';
+            this.improvedArticle = null;
+            return;
+        }
+
+        if (contentField.value.trim().length < 10) {
+            this.error = 'Write at least 10 characters first.';
+            this.improvedArticle = null;
+            return;
+        }
+
+        this.loading = true;
+        this.action = 'article';
+        this.error = '';
+
+        this.result = '';
+        this.titles = [];
+        this.excerpt = '';
+        this.suggestedTags = [];
+        this.selectedTags = [];
+        this.improvedArticle = null;
+
+        try {
+            const response = await fetch(
+                '{{ route('ai.writing.improve-article') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    },
+                    body: JSON.stringify({
+                        content: contentField.value,
+                    }),
+                }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(
+                    data.message || 'Something went wrong.'
+                );
+            }
+
+            this.improvedArticle = data.article || null;
+        } catch (error) {
+            console.error(error);
+            this.error = error.message;
+        } finally {
+            this.loading = false;
+            this.action = null;
+        }
+    },
+    async toggleTag(tag) {
+        const index = this.selectedTags.findIndex(
+            selected => selected.name === tag.name
+        );
+
+        if (index !== -1) {
+            this.selectedTags.splice(index, 1);
+            this.removeTagFromForm(tag);
+            return;
+        }
+
+        this.selectedTags.push(tag);
+
+        await this.addTagToForm(tag);
+    },
+
+    async addTagToForm(tag) {
+        const form = document.querySelector('form');
+
+        if (!form) return;
+
+        /*
+         * Existing tag
+         */
+        if (tag.exists && tag.id) {
+            const checkboxes = form.querySelectorAll(
+                `input[name='tags[]']`
+            );
+
+            const checkbox = Array.from(checkboxes).find(
+                input => input.value === String(tag.id)
+            );
+
+            if (checkbox) {
+                checkbox.checked = true;
+                checkbox.dispatchEvent(
+                    new Event('change', { bubbles: true })
+                );
+            }
+
+            return;
+        }
+
+        /*
+         * New tag
+         */
+        try {
+            const response = await fetch(
+                '{{ route('ai.writing.tags.add') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    },
+                    body: JSON.stringify({
+                        name: tag.name,
+                    }),
+                }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(
+                    data.message || 'Failed to create tag.'
+                );
+            }
+
+            const createdTag = data.tag;
+
+            /*
+             * Update the local AI suggestion.
+             *
+             * It is now a real database tag.
+             */
+            tag.id = createdTag.id;
+            tag.exists = true;
+
+            const tagsContainer = document.querySelector(
+                '#post-tags-container'
+            );
+
+            if (!tagsContainer) return;
+
+            // Remove No tags available message.
+
+            const emptyMessage = document.querySelector(
+                '#no-tags-message'
+            );
+
+            if (emptyMessage) {
+                emptyMessage.remove();
+            }
+
+            /*
+             * Check whether the tag is already displayed.
+             */
+            const existingCheckboxes = tagsContainer.querySelectorAll(
+                `input[name='tags[]']`
+            );
+
+            const alreadyExists = Array.from(existingCheckboxes).find(
+                input => input.value === String(createdTag.id)
+            );
+
+            if (alreadyExists) {
+                alreadyExists.checked = true;
+                return;
+            }
+
+            /*
+             * Create the label.
+             */
+            const label = document.createElement('label');
+
+            label.className =
+                'inline-flex cursor-pointer items-center gap-2 rounded-lg border border-primary bg-primary/5 px-3 py-1.5 text-xs font-medium text-primary transition';
+
+            label.setAttribute(
+                'data-ai-tag',
+                createdTag.name
+            );
+
+            /*
+             * Create checkbox.
+             */
+            const checkbox = document.createElement('input');
+
+            checkbox.type = 'checkbox';
+            checkbox.name = 'tags[]';
+            checkbox.value = createdTag.id;
+            checkbox.checked = true;
+
+            checkbox.className =
+                'rounded border-border text-primary focus:ring-primary';
+
+            /*
+             * Create tag text.
+             */
+            const text = document.createElement('span');
+
+            text.textContent = '#' + createdTag.name;
+
+            /*
+             * Build label.
+             */
+            label.appendChild(checkbox);
+            label.appendChild(text);
+
+            tagsContainer.appendChild(label);
+
+        } catch (error) {
+            console.error(error);
+
             const index = this.selectedTags.findIndex(
                 selected => selected.name === tag.name
             );
 
             if (index !== -1) {
                 this.selectedTags.splice(index, 1);
-                this.removeTagFromForm(tag);
-                return;
             }
 
-            this.selectedTags.push(tag);
-
-            await this.addTagToForm(tag);
-        },
-
-        async addTagToForm(tag) {
-            const form = document.querySelector('form');
-
-            if (!form) return;
-
-            /*
-             * Existing tag
-             */
-            if (tag.exists && tag.id) {
-                const checkboxes = form.querySelectorAll(
-                    `input[name='tags[]']`
-                );
-
-                const checkbox = Array.from(checkboxes).find(
-                    input => input.value === String(tag.id)
-                );
-
-                if (checkbox) {
-                    checkbox.checked = true;
-                    checkbox.dispatchEvent(
-                        new Event('change', { bubbles: true })
-                    );
-                }
-
-                return;
-            }
-
-            /*
-             * New tag
-             */
-            try {
-                const response = await fetch(
-                    '{{ route("ai.writing.tags.add") }}',
-                    {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        },
-                        body: JSON.stringify({
-                            name: tag.name,
-                        }),
-                    }
-                );
-
-                const data = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(
-                        data.message || 'Failed to create tag.'
-                    );
-                }
-
-                const createdTag = data.tag;
-
-                /*
-                 * Update the local AI suggestion.
-                 *
-                 * It is now a real database tag.
-                 */
-                tag.id = createdTag.id;
-                tag.exists = true;
-
-                const tagsContainer = document.querySelector(
-                    '#post-tags-container'
-                );
-
-                if (!tagsContainer) return;
-
-               // Remove No tags available message.
-                    
-                const emptyMessage = document.querySelector(
-                    '#no-tags-message'
-                );
-
-                if (emptyMessage) {
-                    emptyMessage.remove();
-                }
-
-                /*
-                 * Check whether the tag is already displayed.
-                 */
-                const existingCheckboxes = tagsContainer.querySelectorAll(
-                    `input[name='tags[]']`
-                );
-
-                const alreadyExists = Array.from(existingCheckboxes).find(
-                    input => input.value === String(createdTag.id)
-                );
-
-                if (alreadyExists) {
-                    alreadyExists.checked = true;
-                    return;
-                }
-
-                /*
-                 * Create the label.
-                 */
-                const label = document.createElement('label');
-
-                label.className =
-                    'inline-flex cursor-pointer items-center gap-2 rounded-lg border border-primary bg-primary/5 px-3 py-1.5 text-xs font-medium text-primary transition';
-
-                label.setAttribute(
-                    'data-ai-tag',
-                    createdTag.name
-                );
-
-                /*
-                 * Create checkbox.
-                 */
-                const checkbox = document.createElement('input');
-
-                checkbox.type = 'checkbox';
-                checkbox.name = 'tags[]';
-                checkbox.value = createdTag.id;
-                checkbox.checked = true;
-
-                checkbox.className =
-                    'rounded border-border text-primary focus:ring-primary';
-
-                /*
-                 * Create tag text.
-                 */
-                const text = document.createElement('span');
-
-                text.textContent = '#' + createdTag.name;
-
-                /*
-                 * Build label.
-                 */
-                label.appendChild(checkbox);
-                label.appendChild(text);
-
-                tagsContainer.appendChild(label);
-
-            } catch (error) {
-                console.error(error);
-
-                const index = this.selectedTags.findIndex(
-                    selected => selected.name === tag.name
-                );
-
-                if (index !== -1) {
-                    this.selectedTags.splice(index, 1);
-                }
-
-                this.error = error.message;
-            }
-        },
-
-        removeTagFromForm(tag) {
-            const form = document.querySelector('form');
-
-            if (!form) return;
-
-            /*
-             * If the tag has an ID, simply uncheck it.
-             */
-            if (tag.id) {
-                const checkboxes = form.querySelectorAll(
-                    `input[name='tags[]']`
-                );
-
-                const checkbox = Array.from(checkboxes).find(
-                    input => input.value === String(tag.id)
-                );
-
-                if (checkbox) {
-                    checkbox.checked = false;
-                }
-
-                return;
-            }
-
-            /*
-             * Fallback for a tag that has not received an ID yet.
-             */
-            const labels = form.querySelectorAll(
-                'label[data-ai-tag]'
-            );
-
-            const label = Array.from(labels).find(
-                element => element.dataset.aiTag === tag.name
-            );
-
-            if (label) {
-                label.remove();
-            }
-        },
-
-        useTitle(title) {
-            const titleField = document.querySelector(
-                `input[name='title']`
-            );
-
-            if (!titleField || !title) return;
-
-            titleField.value = title;
-
-            titleField.dispatchEvent(
-                new Event('input', {
-                    bubbles: true
-                })
-            );
-
-            this.titles = [];
-        },
-
-        useExcerpt() {
-            const excerptField = document.querySelector(
-                `textarea[name='excerpt']`
-            );
-
-            if (!excerptField || !this.excerpt) return;
-
-            excerptField.value = this.excerpt;
-
-            excerptField.dispatchEvent(
-                new Event('input', {
-                    bubbles: true
-                })
-            );
-
-            this.excerpt = '';
-        },
-
-        useResult() {
-            const contentField = document.querySelector(
-                `textarea[name='content']`
-            );
-
-            if (!contentField || !this.result) return;
-
-            contentField.value = this.result;
-
-            contentField.dispatchEvent(
-                new Event('input', {
-                    bubbles: true
-                })
-            );
-
-            this.result = '';
+            this.error = error.message;
         }
-    }"
-    class="overflow-hidden rounded-2xl border border-border bg-white"
->
-    {{-- Header --}}
+    },
+
+    removeTagFromForm(tag) {
+        const form = document.querySelector('form');
+
+        if (!form) return;
+
+        /*
+         * If the tag has an ID, simply uncheck it.
+         */
+        if (tag.id) {
+            const checkboxes = form.querySelectorAll(
+                `input[name='tags[]']`
+            );
+
+            const checkbox = Array.from(checkboxes).find(
+                input => input.value === String(tag.id)
+            );
+
+            if (checkbox) {
+                checkbox.checked = false;
+            }
+
+            return;
+        }
+
+        /*
+         * Fallback for a tag that has not received an ID yet.
+         */
+        const labels = form.querySelectorAll(
+            'label[data-ai-tag]'
+        );
+
+        const label = Array.from(labels).find(
+            element => element.dataset.aiTag === tag.name
+        );
+
+        if (label) {
+            label.remove();
+        }
+    },
+
+    useTitle(title) {
+        const titleField = document.querySelector(
+            `input[name='title']`
+        );
+
+        if (!titleField || !title) return;
+
+        titleField.value = title;
+
+        titleField.dispatchEvent(
+            new Event('input', {
+                bubbles: true
+            })
+        );
+
+        this.titles = [];
+    },
+
+    useExcerpt() {
+        const excerptField = document.querySelector(
+            `textarea[name='excerpt']`
+        );
+
+        if (!excerptField || !this.excerpt) return;
+
+        excerptField.value = this.excerpt;
+
+        excerptField.dispatchEvent(
+            new Event('input', {
+                bubbles: true
+            })
+        );
+
+        this.excerpt = '';
+    },
+
+    useResult() {
+        const contentField = document.querySelector(
+            `textarea[name='content']`
+        );
+
+        if (!contentField || !this.result) return;
+
+        contentField.value = this.result;
+
+        contentField.dispatchEvent(
+            new Event('input', {
+                bubbles: true
+            })
+        );
+
+        this.result = '';
+    },
+    useImprovedTitle() {
+        if (!this.improvedArticle?.title) return;
+
+        const titleField = document.querySelector(
+            `input[name='title']`
+        );
+
+        if (!titleField) return;
+
+        titleField.value = this.improvedArticle.title;
+
+        titleField.dispatchEvent(
+            new Event('input', {
+                bubbles: true
+            })
+        );
+    },
+    useImprovedExcerpt() {
+        if (!this.improvedArticle?.excerpt) return;
+
+        const excerptField = document.querySelector(
+            `textarea[name='excerpt']`
+        );
+
+        if (!excerptField) return;
+
+        excerptField.value = this.improvedArticle.excerpt;
+
+        excerptField.dispatchEvent(
+            new Event('input', {
+                bubbles: true
+            })
+        );
+    },
+    useImprovedContent() {
+        if (!this.improvedArticle?.content) return;
+
+        const contentField = document.querySelector(
+            `textarea[name='content']`
+        );
+
+        if (!contentField) return;
+
+        contentField.value = this.improvedArticle.content;
+
+        contentField.dispatchEvent(
+            new Event('input', {
+                bubbles: true
+            })
+        );
+    },
+    async applyAllImprovements() {
+        if (!this.improvedArticle) return;
+
+        this.useImprovedTitle();
+        this.useImprovedExcerpt();
+        this.useImprovedContent();
+
+        const tags = this.improvedArticle.tags || [];
+
+        for (const tag of tags) {
+            const alreadySelected = this.selectedTags.some(
+                selected => selected.name === tag.name
+            );
+
+            if (!alreadySelected) {
+                this.selectedTags.push(tag);
+                await this.addTagToForm(tag);
+            }
+        }
+    }
+
+}" class="overflow-hidden rounded-2xl border border-border bg-white">
+   {{-- Header --}}
     <div class="border-b border-border bg-paper px-5 py-4">
         <div class="flex flex-col gap-4">
 
@@ -529,6 +651,67 @@
             </div>
 
             <div class="flex flex-wrap items-center gap-2">
+
+                {{-- Improve Article --}}
+                <button
+                    type="button"
+                    @click="improveArticle()"
+                    :disabled="loading"
+                    class="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-white transition hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                    <template x-if="!(loading && action === 'article')">
+                        <span class="flex items-center gap-2">
+                            <svg
+                                class="h-3.5 w-3.5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-width="1.8"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M12 3l1.45 5.55L19 10l-5.55 1.45L12 17l-1.45-5.55L5 10l5.55-1.45L12 3Z"
+                                />
+
+                                <path
+                                    stroke-width="1.8"
+                                    stroke-linecap="round"
+                                    d="M19 16v5M16.5 18.5h5"
+                                />
+                            </svg>
+
+                            Improve Article
+                        </span>
+                    </template>
+
+                    <template x-if="loading && action === 'article'">
+                        <span class="flex items-center gap-2">
+                            <svg
+                                class="h-3.5 w-3.5 animate-spin"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                            >
+                                <circle
+                                    class="opacity-25"
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    stroke="currentColor"
+                                    stroke-width="3"
+                                />
+
+                                <path
+                                    class="opacity-75"
+                                    fill="currentColor"
+                                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                                />
+                            </svg>
+
+                            Improving Article...
+                        </span>
+                    </template>
+                </button>
 
                 {{-- Improve Writing --}}
                 <button
@@ -767,6 +950,190 @@
         x-text="error"
     ></div>
 
+    {{-- Improve Article Result --}}
+    <div
+        x-show="improvedArticle"
+        x-cloak
+        class="m-5 overflow-hidden rounded-2xl border border-primary/20 bg-white shadow-sm"
+    >
+        {{-- Result Header --}}
+        <div
+            class="flex flex-col gap-3 border-b border-border bg-paper px-4 py-4 sm:flex-row sm:items-center sm:justify-between"
+        >
+            <div>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold uppercase tracking-wider text-ink">
+                        Article Improvement
+                    </span>
+
+                    <span
+                        class="rounded-full bg-primary/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary"
+                    >
+                        AI
+                    </span>
+                </div>
+
+                <p class="mt-1 text-[11px] text-muted">
+                    Review each suggestion before applying it to your article.
+                </p>
+            </div>
+
+            <button
+                type="button"
+                @click="applyAllImprovements()"
+                class="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-3 py-2 text-xs font-bold text-white transition hover:opacity-90 active:scale-95"
+            >
+                <svg
+                    class="h-3.5 w-3.5"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M5 13l4 4L19 7"
+                    />
+                </svg>
+
+                Apply All
+            </button>
+        </div>
+
+        <div class="divide-y divide-border">
+
+            {{-- Improved Title --}}
+            <div class="p-4">
+                <div class="mb-2 flex items-center justify-between gap-3">
+                    <div>
+                        <p class="text-[10px] font-bold uppercase tracking-wider text-muted">
+                            Title
+                        </p>
+                    </div>
+
+                    <button
+                        type="button"
+                        @click="useImprovedTitle()"
+                        class="rounded-lg border border-border bg-white px-3 py-1.5 text-[11px] font-bold text-ink transition hover:border-primary hover:text-primary active:scale-95"
+                    >
+                        Use Title
+                    </button>
+                </div>
+
+                <div
+                    class="rounded-xl border border-border bg-paper px-4 py-3"
+                >
+                    <p
+                        class="text-sm font-semibold leading-6 text-ink"
+                        x-text="improvedArticle?.title"
+                    ></p>
+                </div>
+            </div>
+
+            {{-- Improved Excerpt --}}
+            <div class="p-4">
+                <div class="mb-2 flex items-center justify-between gap-3">
+                    <div>
+                        <p class="text-[10px] font-bold uppercase tracking-wider text-muted">
+                            Excerpt
+                        </p>
+                    </div>
+
+                    <button
+                        type="button"
+                        @click="useImprovedExcerpt()"
+                        class="rounded-lg border border-border bg-white px-3 py-1.5 text-[11px] font-bold text-ink transition hover:border-primary hover:text-primary active:scale-95"
+                    >
+                        Use Excerpt
+                    </button>
+                </div>
+
+                <div
+                    class="rounded-xl border border-border bg-paper px-4 py-3"
+                >
+                    <p
+                        class="text-sm leading-6 text-ink"
+                        x-text="improvedArticle?.excerpt"
+                    ></p>
+                </div>
+            </div>
+
+            {{-- Improved Content --}}
+            <div class="p-4">
+                <div class="mb-2 flex items-center justify-between gap-3">
+                    <div>
+                        <p class="text-[10px] font-bold uppercase tracking-wider text-muted">
+                            Content
+                        </p>
+                    </div>
+
+                    <button
+                        type="button"
+                        @click="useImprovedContent()"
+                        class="rounded-lg border border-border bg-white px-3 py-1.5 text-[11px] font-bold text-ink transition hover:border-primary hover:text-primary active:scale-95"
+                    >
+                        Use Content
+                    </button>
+                </div>
+
+                <div
+                    class="max-h-72 overflow-y-auto whitespace-pre-wrap rounded-xl border border-border bg-paper px-4 py-3"
+                >
+                    <p
+                        class="text-sm leading-7 text-ink"
+                        x-text="improvedArticle?.content"
+                    ></p>
+                </div>
+            </div>
+
+            {{-- Improved Tags --}}
+            <div class="p-4">
+                <div class="mb-3">
+                    <p class="text-[10px] font-bold uppercase tracking-wider text-muted">
+                        Suggested Tags
+                    </p>
+
+                    <p class="mt-0.5 text-[11px] text-muted">
+                        Click a tag to add or remove it from the article.
+                    </p>
+                </div>
+
+                <div class="flex flex-wrap gap-2">
+                    <template
+                        x-for="tag in (improvedArticle?.tags || [])"
+                        :key="tag.name"
+                    >
+                        <button
+                            type="button"
+                            @click="toggleTag(tag)"
+                            :class="selectedTags.some(selected => selected.name === tag.name)
+                                ? 'border-primary bg-primary text-white'
+                                : 'border-border bg-white text-ink hover:bg-paper'"
+                            class="inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium shadow-sm transition"
+                        >
+                            <span x-text="'#' + tag.name"></span>
+
+                            <span
+                                x-show="tag.exists"
+                                class="text-[9px] opacity-70"
+                            >
+                                Existing
+                            </span>
+
+                            <span
+                                x-show="!tag.exists"
+                                class="text-[9px] opacity-70"
+                            >
+                                New
+                            </span>
+                        </button>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- Suggested Tags --}}
     <div
         x-show="suggestedTags.length"
@@ -923,4 +1290,3 @@
         ></div>
     </div>
 </div>
-

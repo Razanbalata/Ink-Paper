@@ -149,4 +149,94 @@ class WritingAssistantTest extends TestCase
             ->assertJsonPath('tags.3.name', 'Web Development')
             ->assertJsonPath('tags.3.exists', false);
     }
+
+public function test_user_can_improve_an_entire_article(): void
+{
+    Http::fake([
+        'api.groq.com/*' => Http::response([
+            'choices' => [
+                [
+                    'message' => [
+                        'content' => json_encode([
+                            'title' => 'Building Better Laravel Applications',
+                            'excerpt' => 'A practical look at building Laravel applications.',
+                            'content' => 'Improved article content with better clarity and flow.',
+                            'tags' => [
+                                'Laravel',
+                                'PHP',
+                                'AI',
+                            ],
+                        ]),
+                    ],
+                ],
+            ],
+        ], 200),
+    ]);
+
+    Tag::create([
+        'name' => 'Laravel',
+        'slug' => 'laravel',
+    ]);
+
+    Tag::create([
+        'name' => 'PHP',
+        'slug' => 'php',
+    ]);
+
+    $user = User::factory()->create();
+
+    $response = $this
+        ->actingAs($user)
+        ->postJson(route('ai.writing.improve-article'), [
+            'content' => 'I am learning Laravel and building applications with PHP and AI.',
+        ]);
+
+    $response
+        ->assertSuccessful()
+        ->assertJson([
+            'success' => true,
+        ])
+        ->assertJsonPath(
+            'article.title',
+            'Building Better Laravel Applications'
+        )
+        ->assertJsonPath(
+            'article.excerpt',
+            'A practical look at building Laravel applications.'
+        )
+        ->assertJsonPath(
+            'article.content',
+            'Improved article content with better clarity and flow.'
+        )
+        ->assertJsonPath(
+            'article.tags.0.name',
+            'Laravel'
+        )
+        ->assertJsonPath(
+            'article.tags.0.exists',
+            true
+        )
+        ->assertJsonPath(
+            'article.tags.1.name',
+            'PHP'
+        )
+        ->assertJsonPath(
+            'article.tags.1.exists',
+            true
+        )
+        ->assertJsonPath(
+            'article.tags.2.name',
+            'AI'
+        )
+        ->assertJsonPath(
+            'article.tags.2.exists',
+            false
+        )
+        ->assertJsonPath(
+            'article.tags.2.id',
+            null
+        );
+}
+
+
 }

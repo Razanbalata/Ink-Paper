@@ -147,6 +147,10 @@ Route::middleware('auth')->group(function () {
         ->name('ai.writing.tags');
         Route::post('/ai/writing/tags/add', [AITagController::class, 'store'])
     ->name('ai.writing.tags.add');
+    Route::post(
+    '/ai/writing/improve-article',
+    [WritingAssistantController::class, 'improveArticle']
+)->name('ai.writing.improve-article');
 });
 
 /*

@@ -4,6 +4,7 @@ namespace App\Services\AI;
 
 use App\AI\Prompts\GenerateExcerptPrompt;
 use App\AI\Prompts\GenerateTitlePrompt;
+use App\AI\Prompts\ImproveArticlePrompt;
 use App\AI\Prompts\ImproveWritingPrompt;
 use App\AI\Prompts\SuggestTagsPrompt;
 use App\Models\Tag;
@@ -233,5 +234,83 @@ class WritingAssistantService
             })
             ->values()
             ->all();
+    }
+
+    public function improveArticle(string $content): array
+    {
+        $response = Http::withToken(config('ai.groq.api_key'))
+            ->baseUrl(config('ai.groq.base_url'))
+            ->timeout(60)
+            ->post('/chat/completions', [
+                'model' => config('ai.groq.model'),
+                'messages' => [
+                    [
+                        'role' => 'system',
+                        'content' => ImproveArticlePrompt::system(),
+                    ],
+                    [
+                        'role' => 'user',
+                        'content' => ImproveArticlePrompt::user($content),
+                    ],
+                ],
+                'temperature' => 0.3,
+                'response_format' => [
+                    'type' => 'json_object',
+                ],
+            ]);
+
+        if ($response->failed()) {
+            throw new RuntimeException(
+                'Failed to improve article.'
+            );
+        }
+
+        $result = $response->json('choices.0.message.content');
+
+        if (!is_string($result) || trim($result) === '') {
+            throw new RuntimeException(
+                'AI returned an empty response.'
+            );
+        }
+
+        $data = json_decode($result, true);
+
+        if (!is_array($data)) {
+            throw new RuntimeException(
+                'AI returned an invalid response.'
+            );
+        }
+
+        $tags = $data['tags'] ?? [];
+
+        if (!is_array($tags)) {
+            $tags = [];
+        }
+
+        $tags = collect($tags)
+            ->filter(fn($tag) => is_string($tag) && trim($tag) !== '')
+            ->map(fn($tag) => trim($tag))
+            ->unique(fn($tag) => mb_strtolower($tag))
+            ->values();
+
+        $resolvedTags = $tags->map(function (string $tagName) {
+            $tag = Tag::whereRaw(
+                'LOWER(name) = ?',
+                [mb_strtolower($tagName)]
+            )->first();
+
+            return [
+                'name' => $tagName,
+                'exists' => $tag !== null,
+                'id' => $tag?->id,
+            ];
+        })->values()->all();
+
+        return [
+            'title' => $data['title'] ?? '',
+            'excerpt' => $data['excerpt'] ?? '',
+            'content' => $data['content'] ?? '',
+            'tags' => $resolvedTags,
+        ];
     }
 }

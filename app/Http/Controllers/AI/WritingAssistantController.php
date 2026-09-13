@@ -80,4 +80,22 @@ class WritingAssistantController extends Controller
             'tags' => $tags,
         ]);
     }
+
+    public function improveArticle(
+        Request $request,
+        WritingAssistantService $writingAssistant
+    ): JsonResponse {
+        $validated = $request->validate([
+            'content' => ['required', 'string', 'min:10'],
+        ]);
+
+        $result = $writingAssistant->improveArticle(
+            $validated['content']
+        );
+
+        return response()->json([
+            'success' => true,
+            'article' => $result,
+        ]);
+    }
 }
