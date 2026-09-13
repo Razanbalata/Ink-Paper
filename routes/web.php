@@ -139,18 +139,20 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('/ai/writing/improve', [WritingAssistantController::class, 'improve'])
         ->name('ai.writing.improve');
+    Route::post('/ai/writing/expand', [WritingAssistantController::class, 'expand'])
+        ->name('ai.writing.expand');
     Route::post('/ai/writing/title', [WritingAssistantController::class, 'title'])
         ->name('ai.writing.title');
     Route::post('/ai/writing/excerpt', [WritingAssistantController::class, 'excerpt'])
         ->name('ai.writing.excerpt');
     Route::post('/ai/writing/tags', [WritingAssistantController::class, 'tags'])
         ->name('ai.writing.tags');
-        Route::post('/ai/writing/tags/add', [AITagController::class, 'store'])
-    ->name('ai.writing.tags.add');
+    Route::post('/ai/writing/tags/add', [AITagController::class, 'store'])
+        ->name('ai.writing.tags.add');
     Route::post(
-    '/ai/writing/improve-article',
-    [WritingAssistantController::class, 'improveArticle']
-)->name('ai.writing.improve-article');
+        '/ai/writing/improve-article',
+        [WritingAssistantController::class, 'improveArticle']
+    )->name('ai.writing.improve-article');
 });
 
 /*

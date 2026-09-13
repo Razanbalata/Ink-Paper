@@ -151,114 +151,148 @@ class WritingAssistantTest extends TestCase
             ->assertJsonPath('tags.3.exists', false);
     }
 
-public function test_user_can_improve_an_entire_article(): void
-{
-    Http::fake([
-        'api.groq.com/*' => Http::response([
-            'choices' => [
-                [
-                    'message' => [
-                        'content' => json_encode([
-                            'title' => 'Building Better Laravel Applications',
-                            'excerpt' => 'A practical look at building Laravel applications.',
-                            'content' => 'Improved article content with better clarity and flow.',
-                            'category' => [
-                                'id' => 1,
-                                'name' => 'Web Development',
-                            ],
-                            'tags' => [
-                                'Laravel',
-                                'PHP',
-                                'AI',
-                            ],
-                        ]),
+    public function test_user_can_improve_an_entire_article(): void
+    {
+        Http::fake([
+            'api.groq.com/*' => Http::response([
+                'choices' => [
+                    [
+                        'message' => [
+                            'content' => json_encode([
+                                'title' => 'Building Better Laravel Applications',
+                                'excerpt' => 'A practical look at building Laravel applications.',
+                                'content' => 'Improved article content with better clarity and flow.',
+                                'category' => [
+                                    'id' => 1,
+                                    'name' => 'Web Development',
+                                ],
+                                'tags' => [
+                                    'Laravel',
+                                    'PHP',
+                                    'AI',
+                                ],
+                            ]),
+                        ],
                     ],
                 ],
-            ],
-        ], 200),
-    ]);
+            ], 200),
+        ]);
 
-    Category::create([
-        'id' => 1,
-        'name' => 'Web Development',
-        'slug' => 'web-development',
-    ]);
+        Category::create([
+            'id' => 1,
+            'name' => 'Web Development',
+            'slug' => 'web-development',
+        ]);
 
-    Tag::create([
-        'name' => 'Laravel',
-        'slug' => 'laravel',
-    ]);
+        Tag::create([
+            'name' => 'Laravel',
+            'slug' => 'laravel',
+        ]);
 
-    Tag::create([
-        'name' => 'PHP',
-        'slug' => 'php',
-    ]);
+        Tag::create([
+            'name' => 'PHP',
+            'slug' => 'php',
+        ]);
 
-    $user = User::factory()->create();
+        $user = User::factory()->create();
 
-    $response = $this
-        ->actingAs($user)
-        ->postJson(
-            route('ai.writing.improve-article'),
-            [
-                'content' => 'I am learning Laravel and building applications with PHP and AI.',
-            ]
-        );
+        $response = $this
+            ->actingAs($user)
+            ->postJson(
+                route('ai.writing.improve-article'),
+                [
+                    'content' => 'I am learning Laravel and building applications with PHP and AI.',
+                ]
+            );
 
-    $response
-        ->assertSuccessful()
-        ->assertJson([
-            'success' => true,
-        ])
-        ->assertJsonPath(
-            'article.title',
-            'Building Better Laravel Applications'
-        )
-        ->assertJsonPath(
-            'article.excerpt',
-            'A practical look at building Laravel applications.'
-        )
-        ->assertJsonPath(
-            'article.content',
-            'Improved article content with better clarity and flow.'
-        )
-        ->assertJsonPath(
-            'article.category.id',
-            1
-        )
-        ->assertJsonPath(
-            'article.category.name',
-            'Web Development'
-        )
-        ->assertJsonPath(
-            'article.tags.0.name',
-            'Laravel'
-        )
-        ->assertJsonPath(
-            'article.tags.0.exists',
-            true
-        )
-        ->assertJsonPath(
-            'article.tags.1.name',
-            'PHP'
-        )
-        ->assertJsonPath(
-            'article.tags.1.exists',
-            true
-        )
-        ->assertJsonPath(
-            'article.tags.2.name',
-            'AI'
-        )
-        ->assertJsonPath(
-            'article.tags.2.exists',
-            false
-        )
-        ->assertJsonPath(
-            'article.tags.2.id',
-            null
-        );
-}
+        $response
+            ->assertSuccessful()
+            ->assertJson([
+                'success' => true,
+            ])
+            ->assertJsonPath(
+                'article.title',
+                'Building Better Laravel Applications'
+            )
+            ->assertJsonPath(
+                'article.excerpt',
+                'A practical look at building Laravel applications.'
+            )
+            ->assertJsonPath(
+                'article.content',
+                'Improved article content with better clarity and flow.'
+            )
+            ->assertJsonPath(
+                'article.category.id',
+                1
+            )
+            ->assertJsonPath(
+                'article.category.name',
+                'Web Development'
+            )
+            ->assertJsonPath(
+                'article.tags.0.name',
+                'Laravel'
+            )
+            ->assertJsonPath(
+                'article.tags.0.exists',
+                true
+            )
+            ->assertJsonPath(
+                'article.tags.1.name',
+                'PHP'
+            )
+            ->assertJsonPath(
+                'article.tags.1.exists',
+                true
+            )
+            ->assertJsonPath(
+                'article.tags.2.name',
+                'AI'
+            )
+            ->assertJsonPath(
+                'article.tags.2.exists',
+                false
+            )
+            ->assertJsonPath(
+                'article.tags.2.id',
+                null
+            );
+    }
 
+    public function test_user_can_expand_content(): void
+    {
+        Http::fake([
+            'api.groq.com/*' => Http::response([
+                'choices' => [
+                    [
+                        'message' => [
+                            'content' => 'Laravel is a powerful framework for building modern web applications. It provides developers with a clean structure and useful tools that make development easier and more organized.',
+                        ],
+                    ],
+                ],
+            ], 200),
+        ]);
 
+        $user = User::factory()->create();
+
+        $response = $this
+            ->actingAs($user)
+            ->postJson(
+                route('ai.writing.expand'),
+                [
+                    'content' => 'Laravel is a powerful framework.',
+                ]
+            );
+
+        $response
+            ->assertSuccessful()
+            ->assertJson([
+                'success' => true,
+            ])
+            ->assertJsonPath(
+                'result',
+                'Laravel is a powerful framework for building modern web applications. It provides developers with a clean structure and useful tools that make development easier and more organized.'
+            );
+    }
 }

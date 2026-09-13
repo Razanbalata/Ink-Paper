@@ -27,6 +27,24 @@ class WritingAssistantController extends Controller
         ]);
     }
 
+    public function expand(
+        Request $request,
+        WritingAssistantService $writingAssistant
+    ): JsonResponse {
+        $validated = $request->validate([
+            'content' => ['required', 'string', 'min:1'],
+        ]);
+
+        $result = $writingAssistant->expandContent(
+            $validated['content']
+        );
+
+        return response()->json([
+            'success' => true,
+            'result' => $result,
+        ]);
+    }
+
     public function title(
         Request $request,
         WritingAssistantService $writingAssistant
