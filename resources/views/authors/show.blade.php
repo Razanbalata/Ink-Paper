@@ -37,12 +37,149 @@
                         </p>
                     @endif
 
+                    {{-- Profile Stats --}}
+                    <div class="mt-6 flex items-center gap-6 text-sm">
+
+                        <button type="button" data-modal-open="followers-modal"
+                            data-url="{{ route('authors.followers', $user) }}"
+                            class="text-sm text-muted hover:text-ink transition *:cursor-pointer">
+                            <span class="font-bold text-ink group-hover:text-primary">
+                                {{ $user->followers_count }}
+                            </span>
+
+                            <span class="text-muted">
+                                Followers
+                            </span>
+                        </button>
+
+                        <button type="button" data-modal-open="following-modal"
+                            data-url="{{ route('authors.following', $user) }}"
+                            class="text-sm text-muted hover:text-ink transition cursor-pointer">
+                            <span class="font-bold text-ink group-hover:text-primary">
+                                {{ $user->following_count }}
+                            </span>
+
+                            <span class="text-muted">
+                                Following
+                            </span>
+                        </button>
+
+                    </div>
+
+                    {{-- Follow Button --}}
+                    @if (auth()->check())
+
+                        @if (auth()->id() !== $user->id)
+
+                            <div class="mt-6">
+
+                                @if ($isFollowing)
+                                    <form method="POST" action="{{ route('users.unfollow', $user) }}">
+                                        @csrf
+                                        @method('DELETE')
+
+                                        <button type="submit"
+                                            class="inline-flex items-center rounded-full border border-border px-5 py-2.5 text-sm font-semibold text-ink transition hover:border-ink">
+                                            Following
+                                        </button>
+                                    </form>
+                                @else
+                                    <form method="POST" action="{{ route('users.follow', $user) }}">
+                                        @csrf
+
+                                        <button type="submit"
+                                            class="inline-flex items-center rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-paper transition hover:bg-primary">
+                                            Follow
+                                        </button>
+                                    </form>
+                                @endif
+
+                            </div>
+
+                        @endif
+                    @else
+                        <div class="mt-6">
+                            <a href="{{ route('login') }}"
+                                class="inline-flex items-center rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-paper transition hover:bg-primary">
+                                Follow
+                            </a>
+                        </div>
+
+                    @endif
+
                 </div>
 
             </div>
 
         </div>
+        {{-- Followers Modal --}}
+        <div id="followers-modal" class="fixed inset-0 z-50 hidden" aria-hidden="true">
+            <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" data-modal-close="followers-modal"></div>
 
+            <div class="relative flex min-h-full items-center justify-center p-4">
+                <div class="relative w-full max-w-lg overflow-hidden rounded-2xl border border-border bg-paper shadow-2xl"
+                    role="dialog" aria-modal="true" aria-labelledby="followers-modal-title">
+                    <div class="flex items-center justify-between border-b border-border px-6 py-5">
+                        <div>
+                            <h2 id="followers-modal-title" class="font-serif text-2xl font-bold text-ink">
+                                Followers
+                            </h2>
+
+                            <p class="mt-1 text-sm text-muted">
+                                People following {{ $user->name }}
+                            </p>
+                        </div>
+
+                        <button type="button" data-modal-close="followers-modal"
+                            class="flex h-9 w-9 items-center justify-center rounded-full text-xl text-muted transition hover:bg-zinc-100 hover:text-ink"
+                            aria-label="Close followers modal">
+                            ×
+                        </button>
+                    </div>
+
+                    <div class="max-h-[65vh] overflow-y-auto px-6 py-5">
+                        <div id="followers-modal-content" class="text-sm text-muted">
+                            Loading...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        {{-- Following Modal --}}
+        <div id="following-modal" class="fixed inset-0 z-50 hidden" aria-hidden="true">
+            <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" data-modal-close="following-modal"></div>
+
+            <div class="relative flex min-h-full items-center justify-center p-4">
+                <div class="relative w-full max-w-lg overflow-hidden rounded-2xl border border-border bg-paper shadow-2xl"
+                    role="dialog" aria-modal="true" aria-labelledby="following-modal-title">
+                    <div class="flex items-center justify-between border-b border-border px-6 py-5">
+                        <div>
+                            <h2 id="following-modal-title" class="font-serif text-2xl font-bold text-ink">
+                                Following
+                            </h2>
+
+                            <p class="mt-1 text-sm text-muted">
+                                People {{ $user->name }} follows
+                            </p>
+                        </div>
+
+                        <button type="button" data-modal-close="following-modal"
+                            class="flex h-9 w-9 items-center justify-center rounded-full text-xl text-muted transition hover:bg-zinc-100 hover:text-ink"
+                            aria-label="Close following modal">
+                            ×
+                        </button>
+                    </div>
+
+                    <div class="max-h-[65vh] overflow-y-auto px-6 py-5">
+                        <div id="following-modal-content" class="text-sm text-muted">
+                            Loading...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </section>
 
 
@@ -215,5 +352,61 @@
         </div>
 
     </section>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // فتح المودال وجلب البيانات
+            document.querySelectorAll('[data-modal-open]').forEach(button => {
+                button.addEventListener('click', () => {
+                    const modalId = button.getAttribute('data-modal-open');
+                    const url = button.getAttribute('data-url');
+                    const modal = document.getElementById(modalId);
+                    const contentContainer = document.getElementById(modalId + '-content');
 
+                    if (modal) {
+                        modal.classList.remove('hidden');
+                        document.body.classList.add('overflow-hidden'); // منع تمرير الصفحة الخلفية
+
+                        // جلب المحتوى عبر AJAX إذا كان فارغاً أو لضمان التحديث
+                        if (url && contentContainer) {
+                            contentContainer.innerHTML =
+                                '<div class="py-8 text-center text-muted">جاري التحميل...</div>';
+
+                            fetch(url)
+                                .then(response => response.text())
+                                .then(html => {
+                                    contentContainer.innerHTML = html;
+                                })
+                                .catch(error => {
+                                    contentContainer.innerHTML =
+                                        '<div class="py-8 text-center text-red-500">حدث خطأ أثناء تحميل البيانات.</div>';
+                                });
+                        }
+                    }
+                });
+            });
+
+            // إغلاق المودال
+            document.querySelectorAll('[data-modal-close]').forEach(element => {
+                element.addEventListener('click', () => {
+                    const modalId = element.getAttribute('data-modal-close');
+                    const modal = document.getElementById(modalId);
+
+                    if (modal) {
+                        modal.classList.add('hidden');
+                        document.body.classList.remove('overflow-hidden');
+                    }
+                });
+            });
+
+            // إغلاق المودال عند الضغط على زر Esc من لوحة المفاتيح
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    document.querySelectorAll('.fixed.inset-0.z-50:not(.hidden)').forEach(modal => {
+                        modal.classList.add('hidden');
+                        document.body.classList.remove('overflow-hidden');
+                    });
+                }
+            });
+        });
+    </script>
 @endsection

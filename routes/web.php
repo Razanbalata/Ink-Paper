@@ -2,12 +2,13 @@
 
 use App\Http\Controllers\AI\AITagController;
 use App\Http\Controllers\AI\WritingAssistantController;
-use App\Http\Controllers\Dashboard\TagController;
 use App\Http\Controllers\BookmarkController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\Dashboard\TagController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DashboardPostController;
+use App\Http\Controllers\FollowController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PostController;
@@ -155,6 +156,14 @@ Route::middleware('auth')->group(function () {
     )->name('ai.writing.improve-article');
 });
 
+Route::middleware('auth')->group(function () {
+    Route::post('/users/{user}/follow', [FollowController::class, 'store'])
+        ->name('users.follow');
+
+    Route::delete('/users/{user}/follow', [FollowController::class, 'destroy'])
+        ->name('users.unfollow');
+});
+
 /*
  * |--------------------------------------------------------------------------
  * | Wildcard Routes (يجب أن تكون في الأسفل لتجنب التضارب)
@@ -164,7 +173,14 @@ Route::get('/posts/{post:slug}', [PostController::class, 'show'])->name('posts.s
 
 Route::get('/categories/{category:slug}', [PublicCategoryController::class, 'show'])->name('categories.show');
 Route::get('/tags/{tag:slug}', [PublicTagController::class, 'show'])->name('tags.show');
-Route::get('/authors/{user}', [PublicAuthorController::class, 'show'])->name('authors.show');
+Route::get('/authors/{user}/followers', [PublicAuthorController::class, 'followers'])
+    ->name('authors.followers');
+
+Route::get('/authors/{user}/following', [PublicAuthorController::class, 'following'])
+    ->name('authors.following');
+
+Route::get('/authors/{user}', [PublicAuthorController::class, 'show'])
+    ->name('authors.show');
 Route::get('/search', [SearchController::class, 'index'])->name('search');
 
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';
