@@ -9,7 +9,7 @@
 
                 <div class="flex items-center gap-8">
                     <!-- Brand Logo -->
-                    <a href="{{ route('dashboard') }}" class="font-serif text-xl font-extrabold tracking-tight text-ink">
+                    <a href="{{ route('home') }}" class="font-serif text-xl font-extrabold tracking-tight text-ink">
                         Ink <span class="font-normal text-primary">&amp;</span> Paper <span
                             class="ml-1 rounded-md bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">Studio</span>
                     </a>

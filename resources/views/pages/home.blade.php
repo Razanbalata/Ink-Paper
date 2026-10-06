@@ -152,9 +152,15 @@
                                     <p class="text-sm font-semibold text-ink">
                                         {{ $featuredPost->user->name ?? 'Anonymous' }}
                                     </p>
-                                    <p class="text-xs text-muted">
-                                        {{ $featuredPost->published_at?->format('F d, Y') }} ·
-                                        {{ $featuredPost->read_time }} min read
+                                    <p class="text-xs text-slate-500 flex items-center gap-1.5 flex-wrap">
+                                        @if ($featuredPost->published_at)
+                                            <span>{{ $featuredPost->published_at->format('F d, Y') }}</span>
+                                            <span>·</span>
+                                        @endif
+
+                                        <span>{{ $featuredPost->read_time }} min read</span>
+                                        <span>·</span>
+                                        <span>{{ number_format($featuredPost->views_count) }} views</span>
                                     </p>
                                 </div>
                             </div>
@@ -237,12 +243,17 @@
                                 <div class="flex items-center gap-2.5">
                                     <x-avatar :name="$post->user->name ?? 'Anonymous'" size="sm" />
                                     <div>
-                                        <p class="text-xs font-semibold text-ink">
+                                        {{-- Author Name --}}
+                                        <p class="text-xs font-semibold text-slate-900">
                                             {{ $post->user->name ?? 'Anonymous' }}
                                         </p>
-                                        <p class="text-[11px] text-muted">
-                                            {{ $post->read_time }} min read
-                                        </p>
+
+                                        {{-- Meta Info (Read time & Views) --}}
+                                        <div class="mt-0.5 flex items-center gap-1.5 text-[11px] text-slate-500">
+                                            <span>{{ $post->read_time }} min read</span>
+                                            <span>·</span>
+                                            <span>{{ number_format($post->views_count) }} views</span>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -289,7 +300,7 @@
                     </p>
                 </div>
 
-                <a href="#"
+                <a href="{{ route('posts.index') }}"
                     class="group inline-flex items-center gap-2 text-sm font-semibold text-ink transition hover:text-primary">
                     View all topics
                     <span class="transition-transform duration-200 group-hover:translate-x-1">&rarr;</span>
@@ -354,14 +365,14 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             @if ($trendingStories->count())
                 @foreach ($trendingStories as $post)
-                    <x-card :post="$post" >
-                        
+                    <x-card :post="$post">
+
                     </x-card>
                 @endforeach
             @endif
         </div>
     </section>
-   
+
 
     {{-- Call to Action Section --}}
     <section class="relative overflow-hidden border-b border-border bg-paper py-24 sm:py-32">

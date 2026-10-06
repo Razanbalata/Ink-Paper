@@ -7,13 +7,17 @@ use App\Http\Requests\UpdatePostRequest;
 use App\Models\Category;
 use App\Models\Post;
 use App\Models\Tag;
+use App\Services\ViewTrackingService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class PostController extends Controller
 {
     use AuthorizesRequests;
+
+    public function __construct(
+        private ViewTrackingService $viewTrackingService
+    ) {}
 
     /**
      * Display a listing of the resource.
@@ -29,7 +33,7 @@ class PostController extends Controller
             ->latest()
             ->paginate(10);
 
-        return view('dashboard.posts.index', compact('posts'));
+        return view('posts.index', compact('posts'));
     }
 
     /**
@@ -88,7 +92,7 @@ class PostController extends Controller
             $post->status === 'published' && $post->published_at !== null,
             404
         );
-
+        $this->viewTrackingService->track($post);
         $post->load([
             'user',
             'category',
@@ -96,6 +100,7 @@ class PostController extends Controller
             'comments.user',
             'reactions',
         ]);
+        $post->loadCount('views');
 
         return view('posts.show', compact('post'));
     }
@@ -122,57 +127,57 @@ class PostController extends Controller
      * Update the specified resource in storage.
      */
     public function update(
-    UpdatePostRequest $request,
-    Post $post
-) {
-    $this->authorize('update', $post);
+        UpdatePostRequest $request,
+        Post $post
+    ) {
+        $this->authorize('update', $post);
 
-    $data = $request->validated();
+        $data = $request->validated();
 
-    $tags = $data['tags'] ?? [];
-    unset($data['tags']);
+        $tags = $data['tags'] ?? [];
+        unset($data['tags']);
 
-    $data['slug'] = Str::slug($data['title']);
+        $data['slug'] = Str::slug($data['title']);
 
-    /*
-    |--------------------------------------------------------------------------
-    | Cover Image
-    |--------------------------------------------------------------------------
-    */
+        /*
+        |--------------------------------------------------------------------------
+        | Cover Image
+        |--------------------------------------------------------------------------
+        */
 
-    if ($request->hasFile('cover_image')) {
+        if ($request->hasFile('cover_image')) {
 
-        // Delete old image
-        if ($post->cover_image) {
-            Storage::disk('public')->delete($post->cover_image);
+            // Delete old image
+            if ($post->cover_image) {
+                Storage::disk('public')->delete($post->cover_image);
+            }
+
+            // Store new image
+            $data['cover_image'] = $request
+                ->file('cover_image')
+                ->store('posts', 'public');
         }
 
-        // Store new image
-        $data['cover_image'] = $request
-            ->file('cover_image')
-            ->store('posts', 'public');
+        /*
+        |--------------------------------------------------------------------------
+        | Publishing
+        |--------------------------------------------------------------------------
+        */
+
+        if ($data['status'] === 'published') {
+            $data['published_at'] ??= $post->published_at ?? now();
+        } else {
+            $data['published_at'] = null;
+        }
+
+        $post->update($data);
+
+        $post->tags()->sync($tags);
+
+        return redirect()
+            ->route('dashboard.posts', $post)
+            ->with('success', 'Post updated successfully.');
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Publishing
-    |--------------------------------------------------------------------------
-    */
-
-    if ($data['status'] === 'published') {
-        $data['published_at'] ??= $post->published_at ?? now();
-    } else {
-        $data['published_at'] = null;
-    }
-
-    $post->update($data);
-
-    $post->tags()->sync($tags);
-
-    return redirect()
-        ->route('dashboard.posts', $post)
-        ->with('success', 'Post updated successfully.');
-}
 
     /**
      * Remove the specified resource from storage.

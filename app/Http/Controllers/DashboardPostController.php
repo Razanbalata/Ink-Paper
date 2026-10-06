@@ -22,6 +22,7 @@ class DashboardPostController extends Controller
         }
 
         $posts = $query
+            ->withCount('views')
             ->paginate(10)
             ->withQueryString();
 
@@ -44,6 +45,7 @@ class DashboardPostController extends Controller
             'tags',
             'comments.user',
             'reactions',
+            'views',
         ]);
 
         return view(

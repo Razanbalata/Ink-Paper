@@ -53,14 +53,25 @@
                 </div>
 
                 <div class="flex items-center gap-4 text-xs font-semibold text-muted">
-                    <span class="flex items-center gap-1.5">
-                        <svg class="h-4 w-4 stroke-[1.8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        {{ $post->read_time }} min read
-                    </span>
-                </div>
+    <span class="flex items-center gap-1.5">
+        <svg class="h-4 w-4 stroke-[1.8]" fill="none"
+            stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 01-18 0z" />
+        </svg>
+        {{ $post->read_time }} min read
+    </span>
+
+    <span class="flex items-center gap-1.5">
+        <svg class="h-4 w-4 stroke-[1.8]" fill="none"
+            stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                d="M2.25 12s3.5-5.25 9.75-5.25S21.75 12 21.75 12 18.25 17.25 12 17.25 2.25 12 2.25 12Z" />
+            <circle cx="12" cy="12" r="2.5" />
+        </svg>
+        {{ number_format($post->views_count) }} views
+    </span>
+</div>
             </div>
         </header>
 

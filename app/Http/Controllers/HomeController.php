@@ -16,6 +16,7 @@ class HomeController extends Controller
                 'user',
                 'category',
             ])
+            ->withCount('views')
             ->latest('published_at')
             ->first();
         // dd($featuredPost);
@@ -34,6 +35,7 @@ class HomeController extends Controller
                         $featuredPost->id
                     )
             )
+            ->withCount('views')
             ->latest('published_at')
             ->paginate(10);
 

@@ -63,9 +63,30 @@
                             {{ $post->excerpt }}
                         </p>
 
-                        <div class="pt-2 text-xs text-muted">
-                            Created on {{ $post->created_at->format('M d, Y') }}
-                        </div>
+                        <div class="flex items-center gap-3 pt-2 text-xs text-slate-500">
+    
+    {{-- Created Date --}}
+    <div class="flex items-center gap-1.5">
+        <svg class="h-3.5 w-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+        </svg>
+        <span>Created on {{ $post->created_at->format('M d, Y') }}</span>
+    </div>
+
+    {{-- Separator Dot --}}
+    <span class="h-1 w-1 rounded-full bg-slate-300"></span>
+
+    {{-- Views Count --}}
+    <div class="flex items-center gap-1.5">
+        <svg class="h-3.5 w-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M2.25 12s3.5-5.25 9.75-5.25S21.75 12 21.75 12 18.25 17.25 12 17.25 2.25 12 2.25 12Z" />
+            <circle cx="12" cy="12" r="2.5" />
+        </svg>
+        <span>{{ number_format($post->views_count) }} views</span>
+    </div>
+
+</div>
+                       
                     </div>
 
                     <!-- Actions & Status -->

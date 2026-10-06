@@ -81,6 +81,11 @@ class User extends Authenticatable
         )->withTimestamps();
     }
 
+    public function postViews(): HasMany
+    {
+        return $this->hasMany(PostView::class);
+    }
+
     public function bookmarkedPosts()
     {
         return $this

@@ -1,8 +1,8 @@
-@extends('layouts.app')
+@extends('layouts.guest')
 
 @section('title', 'Contact — Ink & Paper')
 
-@section('content')
+@section('public-content')
 
 <section class="mx-auto max-w-3xl px-4 py-24 sm:px-6 lg:px-8">
 
