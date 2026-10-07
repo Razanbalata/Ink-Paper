@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\User;
+use App\Notifications\FollowReceived;
 use LogicException;
 
 class FollowService
@@ -21,6 +22,8 @@ class FollowService
         }
 
         $follower->following()->attach($following->id);
+
+        $following->notify(new FollowReceived($follower));
     }
 
     /**
