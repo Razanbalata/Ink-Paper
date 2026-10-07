@@ -7,7 +7,7 @@
 
             {{-- Cover --}}
             <a
-                href="{{ route('posts.show', $post->slug) }}"
+                href="{{ route('posts.show', $post) }}"
                 class="relative flex h-52 items-center justify-center overflow-hidden rounded-lg bg-zinc-100"
             >
 
@@ -47,7 +47,7 @@
 
                 <h3 class="font-serif text-2xl font-bold leading-snug text-ink transition group-hover:text-primary">
 
-                    <a href="{{ route('posts.show', $post->slug) }}">
+                    <a href="{{ route('posts.show', $post) }}">
                         {{ $post->title }}
                     </a>
 

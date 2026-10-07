@@ -116,8 +116,9 @@
     <div>
         <!-- Ink AI -->
         <x-ai.writing-assistant />
-        <textarea name="content" rows="8" placeholder="Write your story here..."
-            class="mt-2 w-full rounded-xl border border-border bg-paper p-4 text-sm text-ink placeholder-muted transition focus:border-primary focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary">{{ old('content', $post?->content) }}</textarea>
+        <div class="mt-2">
+            <x-editor.rich-editor name="content" :value="old('content', $post?->content)" />
+        </div>
         @error('content')
             <p class="mt-1.5 text-xs font-medium text-rose-600">{{ $message }}</p>
         @enderror

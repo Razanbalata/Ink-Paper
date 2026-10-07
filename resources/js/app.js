@@ -12,3 +12,4 @@ Alpine.start();
 
 import './echo';
 import './notifications';
+import './rich-editor';

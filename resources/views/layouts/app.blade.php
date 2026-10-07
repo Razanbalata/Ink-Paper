@@ -17,12 +17,13 @@
         rel="stylesheet">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+@stack('styles')
 </head>
 
 <body class="min-h-screen bg-paper font-sans text-ink antialiased">
 
     @yield('content')
-
+@stack('scripts')
 </body>
 
 </html>

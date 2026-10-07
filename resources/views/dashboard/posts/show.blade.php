@@ -155,7 +155,7 @@
         {{-- Article Body --}}
         <div class="rounded-2xl border border-slate-200/80 bg-white p-6 sm:p-10 shadow-2xs">
             <div class="prose prose-slate max-w-none text-slate-800 leading-relaxed text-base sm:text-lg">
-                {!! nl2br(e($post->content)) !!}
+                {!! $post->content !!}
             </div>
         </div>
 

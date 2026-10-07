@@ -91,7 +91,7 @@
                        prose-a:text-primary prose-a:underline-offset-4 prose-a:decoration-primary/30 hover:prose-a:decoration-primary 
                        prose-blockquote:border-l-primary prose-blockquote:bg-paper/40 prose-blockquote:py-3 prose-blockquote:px-6 prose-blockquote:rounded-r-lg prose-blockquote:not-italic
                        selection:bg-primary/15 selection:text-ink">
-                {!! nl2br(e($post->content)) !!}
+                {!! $post->content!!}
             </div>
         </section>
 

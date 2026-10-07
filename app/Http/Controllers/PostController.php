@@ -9,6 +9,7 @@ use App\Models\Post;
 use App\Models\Tag;
 use App\Services\ViewTrackingService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class PostController extends Controller
