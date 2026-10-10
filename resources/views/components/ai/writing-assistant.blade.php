@@ -18,18 +18,63 @@
 
         error: '',
 
-        async improveWriting() {
-            const contentField = document.querySelector(
-                `textarea[name='content']`
+        getContentValue() {
+            const textarea = document.querySelector(
+                `[data-rich-editor-input]`
+            );
+            const hiddenInput = document.querySelector(
+                `input[name='content']`
             );
 
-            if (!contentField || !contentField.value.trim()) {
+            return hiddenInput ? hiddenInput.value : textarea ? textarea.value : '';
+        },
+
+        normalizeContent(value) {
+            return (value ?? '')
+                .replace(/<[^>]*>/g, '')
+                .replace(/&nbsp;/gi, ' ')
+                .replace(/\u00A0/g, ' ')
+                .trim();
+        },
+
+        setContentValue(value) {
+            const textarea = document.querySelector(
+                `textarea[name='content']`
+            );
+            const hiddenInput = document.querySelector(
+                `input[name='content'][data-rich-editor-input]`
+            );
+
+            if (textarea) {
+                textarea.value = value;
+                textarea.dispatchEvent(
+                    new Event('input', {
+                        bubbles: true,
+                    })
+                );
+            }
+
+            if (hiddenInput) {
+                hiddenInput.value = value;
+                hiddenInput.dispatchEvent(
+                    new Event('input', {
+                        bubbles: true,
+                    })
+                );
+            }
+        },
+
+        async improveWriting() {
+            const content = this.getContentValue();
+            const normalizedContent = this.normalizeContent(content);
+
+            if (!normalizedContent) {
                 this.error = 'Write some content first.';
                 this.result = '';
                 return;
             }
 
-            if (contentField.value.trim().length < 10) {
+            if (normalizedContent.length < 10) {
                 this.error = 'Write at least 10 characters first.';
                 this.result = '';
                 return;
@@ -52,7 +97,7 @@
                             'X-CSRF-TOKEN': '{{ csrf_token() }}',
                         },
                         body: JSON.stringify({
-                            content: contentField.value,
+                            content,
                         }),
                     }
                 );
@@ -77,11 +122,10 @@
         },
 
         async expandContent() {
-            const contentField = document.querySelector(
-                `textarea[name='content']`
-            );
+            const content = this.getContentValue();
+            const normalizedContent = this.normalizeContent(content);
 
-            if (!contentField || !contentField.value.trim()) {
+            if (!normalizedContent) {
                 this.error = 'Write some content first.';
                 this.result = '';
                 return;
@@ -104,7 +148,7 @@
                             'X-CSRF-TOKEN': '{{ csrf_token() }}',
                         },
                         body: JSON.stringify({
-                            content: contentField.value,
+                            content,
                         }),
                     }
                 );
@@ -129,17 +173,16 @@
         },
 
         async generateTitle() {
-            const contentField = document.querySelector(
-                `textarea[name='content']`
-            );
+            const content = this.getContentValue();
+            const normalizedContent = this.normalizeContent(content);
 
-            if (!contentField || !contentField.value.trim()) {
+            if (!normalizedContent) {
                 this.error = 'Write some content first.';
                 this.titles = [];
                 return;
             }
 
-            if (contentField.value.trim().length < 10) {
+            if (normalizedContent.length < 10) {
                 this.error = 'Write at least 10 characters first.';
                 this.titles = [];
                 return;
@@ -161,7 +204,7 @@
                             'X-CSRF-TOKEN': '{{ csrf_token() }}',
                         },
                         body: JSON.stringify({
-                            content: contentField.value,
+                            content,
                         }),
                     }
                 );
@@ -186,17 +229,16 @@
         },
 
         async generateExcerpt() {
-            const contentField = document.querySelector(
-                `textarea[name='content']`
-            );
+            const content = this.getContentValue();
+            const normalizedContent = this.normalizeContent(content);
 
-            if (!contentField || !contentField.value.trim()) {
+            if (!normalizedContent) {
                 this.error = 'Write some content first.';
                 this.excerpt = '';
                 return;
             }
 
-            if (contentField.value.trim().length < 10) {
+            if (normalizedContent.length < 10) {
                 this.error = 'Write at least 10 characters first.';
                 this.excerpt = '';
                 return;
@@ -218,7 +260,7 @@
                             'X-CSRF-TOKEN': '{{ csrf_token() }}',
                         },
                         body: JSON.stringify({
-                            content: contentField.value,
+                            content,
                         }),
                     }
                 );
@@ -243,17 +285,16 @@
         },
 
         async suggestTags() {
-            const contentField = document.querySelector(
-                `textarea[name='content']`
-            );
+            const content = this.getContentValue();
+            const normalizedContent = this.normalizeContent(content);
 
-            if (!contentField || !contentField.value.trim()) {
+            if (!normalizedContent) {
                 this.error = 'Write some content first.';
                 this.suggestedTags = [];
                 return;
             }
 
-            if (contentField.value.trim().length < 10) {
+            if (normalizedContent.length < 10) {
                 this.error = 'Write at least 10 characters first.';
                 this.suggestedTags = [];
                 return;
@@ -275,7 +316,7 @@
                             'X-CSRF-TOKEN': '{{ csrf_token() }}',
                         },
                         body: JSON.stringify({
-                            content: contentField.value,
+                            content,
                         }),
                     }
                 );
@@ -300,17 +341,16 @@
         },
 
         async improveArticle() {
-            const contentField = document.querySelector(
-                `textarea[name='content']`
-            );
+            const content = this.getContentValue();
+            const normalizedContent = this.normalizeContent(content);
 
-            if (!contentField || !contentField.value.trim()) {
+            if (!normalizedContent) {
                 this.error = 'Write some content first.';
                 this.improvedArticle = null;
                 return;
             }
 
-            if (contentField.value.trim().length < 10) {
+            if (normalizedContent.length < 10) {
                 this.error = 'Write at least 10 characters first.';
                 this.improvedArticle = null;
                 return;
@@ -341,7 +381,7 @@
                             'X-CSRF-TOKEN': '{{ csrf_token() }}',
                         },
                         body: JSON.stringify({
-                            content: contentField.value,
+                            content,
                         }),
                     }
                 );
@@ -407,37 +447,13 @@
         useImprovedContent() {
             if (!this.improvedArticle?.content) return;
 
-            const contentField = document.querySelector(
-                `textarea[name='content']`
-            );
-
-            if (!contentField) return;
-
-            contentField.value = this.improvedArticle.content;
-
-            contentField.dispatchEvent(
-                new Event('input', {
-                    bubbles: true
-                })
-            );
+            this.setContentValue(this.improvedArticle.content);
         },
 
         useCurrentResult() {
             if (!this.result) return;
 
-            const contentField = document.querySelector(
-                `textarea[name='content']`
-            );
-
-            if (!contentField) return;
-
-            contentField.value = this.result;
-
-            contentField.dispatchEvent(
-                new Event('input', {
-                    bubbles: true
-                })
-            );
+            this.setContentValue(this.result);
         },
 
         useImprovedCategory() {
@@ -902,7 +918,7 @@
 
             <div
                 class="whitespace-pre-line text-sm leading-7 text-ink"
-                x-text="result"
+                x-text="normalizeContent(result)"
             ></div>
 
             <div class="mt-4 flex justify-end border-t border-border pt-4">
