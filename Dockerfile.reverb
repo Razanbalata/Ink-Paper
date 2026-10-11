@@ -21,5 +21,4 @@ RUN COMPOSER_ALLOW_SUPERUSER=1 composer install \
     --optimize-autoloader \
     --no-interaction 
 
-CMD ["sh", "-c", "php artisan reverb:start --host=0.0.0.0 --port=${PORT:-8080}"]
-
+CMD ["sh", "-c", "echo '=== REVERB CONTAINER STARTED ==='; php -v; echo '=== CHECKING LARAVEL ==='; php artisan --version; echo '=== STARTING REVERB ==='; exec php artisan reverb:start --host=0.0.0.0 --port=${PORT:-8080}"]
